@@ -585,9 +585,9 @@ BOOL CALLBACK ExplorerDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam
 
 			/* unsubclass */
 			if (_hDefaultTreeProc != NULL)
-				::SetWindowLongPtr(_hTreeCtrl, GWL_WNDPROC, (LONG)_hDefaultTreeProc);
+				::SetWindowLongPtr(_hTreeCtrl, GWLP_WNDPROC, (LONG_PTR)_hDefaultTreeProc);
 			if (_hDefaultSplitterProc != NULL)
-				::SetWindowLongPtr(_hSplitterCtrl, GWL_WNDPROC, (LONG)_hDefaultSplitterProc);
+				::SetWindowLongPtr(_hSplitterCtrl, GWLP_WNDPROC, (LONG_PTR)_hDefaultSplitterProc);
 
 			break;
 		}
@@ -1240,7 +1240,7 @@ void ExplorerDialog::NotifyEvent(DWORD event)
 	POINT	pt		= {0};
 	LONG	oldCur	= NULL;
 
-	oldCur = ::SetClassLong(_hSelf, GCL_HCURSOR, (LONG)_hCurWait);
+	oldCur = ::SetClassLongPtr(_hSelf, GCLP_HCURSOR, (LONG_PTR)_hCurWait);
 	::EnableWindow(_hSelf, FALSE);
 	::GetCursorPos(&pt);
 	::SetCursorPos(pt.x, pt.y);
@@ -1308,7 +1308,7 @@ void ExplorerDialog::NotifyEvent(DWORD event)
 				DrawChildren(_hItemExpand);
 			} else {
 				/* set cursor back before tree is updated for faster access */
-				::SetClassLong(_hSelf, GCL_HCURSOR, oldCur);
+				::SetClassLongPtr(_hSelf, GCLP_HCURSOR, oldCur);
 				::EnableWindow(_hSelf, TRUE);
 				::GetCursorPos(&pt);
 				::SetCursorPos(pt.x, pt.y);
@@ -1328,7 +1328,7 @@ void ExplorerDialog::NotifyEvent(DWORD event)
 			break;
 	}
 
-	::SetClassLong(_hSelf, GCL_HCURSOR, oldCur);
+	::SetClassLongPtr(_hSelf, GCLP_HCURSOR, oldCur);
 	::EnableWindow(_hSelf, TRUE);
 	::GetCursorPos(&pt);
 	::SetCursorPos(pt.x, pt.y);
@@ -1352,14 +1352,14 @@ void ExplorerDialog::InitialDialog(void)
 	}
 
 	/* subclass tree */
-	::SetWindowLongPtr(_hTreeCtrl, GWL_USERDATA, (LONG)this);
-	_hDefaultTreeProc = (WNDPROC)::SetWindowLongPtr(_hTreeCtrl, GWL_WNDPROC, (LONG)wndDefaultTreeProc);
+	::SetWindowLongPtr(_hTreeCtrl, GWLP_USERDATA, (LONG_PTR)this);
+	_hDefaultTreeProc = (WNDPROC)::SetWindowLongPtr(_hTreeCtrl, GWLP_WNDPROC, (LONG_PTR)wndDefaultTreeProc);
 
 	/* subclass splitter */
 	_hSplitterCursorUpDown		= ::LoadCursor(_hInst, MAKEINTRESOURCE(IDC_UPDOWN));
 	_hSplitterCursorLeftRight	= ::LoadCursor(_hInst, MAKEINTRESOURCE(IDC_LEFTRIGHT));
-	::SetWindowLongPtr(_hSplitterCtrl, GWL_USERDATA, (LONG)this);
-	_hDefaultSplitterProc = (WNDPROC)::SetWindowLongPtr(_hSplitterCtrl, GWL_WNDPROC, (LONG)wndDefaultSplitterProc);
+	::SetWindowLongPtr(_hSplitterCtrl, GWLP_USERDATA, (LONG_PTR)this);
+	_hDefaultSplitterProc = (WNDPROC)::SetWindowLongPtr(_hSplitterCtrl, GWLP_WNDPROC, (LONG_PTR)wndDefaultSplitterProc);
 
 	/* Load Image List */
 	::SendMessage(_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)GetSmallImageList(_pExProp->bUseSystemIcons));

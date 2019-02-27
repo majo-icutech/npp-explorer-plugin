@@ -200,7 +200,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 			/* Remove subclaasing */
 			if (wndProcNotepad != NULL)
-				SetWindowLongPtr(nppData._nppHandle, GWL_WNDPROC, (LONG)wndProcNotepad);
+				SetWindowLongPtr(nppData._nppHandle, GWLP_WNDPROC, (LONG_PTR)wndProcNotepad);
 
 			FreeLibrary(hShell32);
 	
@@ -247,7 +247,7 @@ extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 	helpDlg.init((HINSTANCE)g_hModule, nppData);
 
 	/* Subclassing for Notepad */
-	wndProcNotepad = (WNDPROC)SetWindowLongPtr(nppData._nppHandle, GWL_WNDPROC, (LPARAM)SubWndProcNotepad);
+	wndProcNotepad = (WNDPROC)SetWindowLongPtr(nppData._nppHandle, GWLP_WNDPROC, (LPARAM)SubWndProcNotepad);
 }
 
 extern "C" __declspec(dllexport) LPCTSTR getName()

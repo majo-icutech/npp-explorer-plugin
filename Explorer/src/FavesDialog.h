@@ -145,7 +145,7 @@ protected:
 	/* Subclassing tree */
 	LRESULT runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK wndDefaultTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-		return (((FavesDialog *)(::GetWindowLong(hwnd, GWL_USERDATA)))->runTreeProc(hwnd, Message, wParam, lParam));
+		return (((FavesDialog *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA)))->runTreeProc(hwnd, Message, wParam, lParam));
 	};
 
 private:

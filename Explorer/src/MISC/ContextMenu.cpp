@@ -169,7 +169,7 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 		g_OldWndProc	= NULL;
 		if (iMenuType > 1)	// only subclass if its version 2 or 3
 		{
-			g_OldWndProc = (WNDPROC)::SetWindowLongPtr (hWndParent, GWL_WNDPROC, (DWORD) HookWndProc);
+			g_OldWndProc = (WNDPROC)::SetWindowLongPtr (hWndParent, GWLP_WNDPROC, (LONG_PTR) HookWndProc);
 			if (iMenuType == 2)
 				g_IContext2 = (LPCONTEXTMENU2) pContextMenu;
 			else	// version 3
@@ -255,7 +255,7 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 		if (_strNppScripts.size() != 0)
 			::AppendMenu(hMenuNppExec, MF_SEPARATOR, 0, NULL);
 		::AppendMenu(hMenuNppExec, MF_STRING, CTX_GOTO_SCRIPT_PATH, _T("Go to script folder"));
-		::AppendMenu(hMainMenu, MF_STRING | MF_POPUP, (UINT)hMenuNppExec, _T("NppExec Script(s)"));
+		::AppendMenu(hMainMenu, MF_STRING | MF_POPUP, (UINT_PTR)hMenuNppExec, _T("NppExec Script(s)"));
 	}
 	else
 	{
@@ -310,7 +310,7 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 			if (!NLGetText(_hInst, _hWndNpp, _T("Standard Menu"), szMenuName, MAX_PATH)) {
 				_tcscpy(szMenuName, _T("Standard Menu"));
 			}
-			::InsertMenu(hMainMenu, 4, MF_BYPOSITION | MF_STRING | MF_POPUP, (UINT)_hMenu, szMenuName);
+			::InsertMenu(hMainMenu, 4, MF_BYPOSITION | MF_STRING | MF_POPUP, (UINT_PTR)_hMenu, szMenuName);
 			::InsertMenu(hMainMenu, (dwExecVer >= 0x02F5 ? 7 : 6), MF_BYPOSITION | MF_SEPARATOR, 0, 0);
 		}
 		else
@@ -348,7 +348,7 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 
 	if ((_pidlArray != NULL) && (g_OldWndProc != NULL)) // unsubclass
 	{
-		::SetWindowLongPtr(hWndParent, GWL_WNDPROC, (DWORD) g_OldWndProc);
+		::SetWindowLongPtr(hWndParent, GWLP_WNDPROC, (LONG_PTR) g_OldWndProc);
 	}
 
 	// see if returned idCommand belongs to shell menu entries but not for renaming (19)

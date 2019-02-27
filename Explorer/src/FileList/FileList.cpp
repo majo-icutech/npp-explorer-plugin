@@ -145,7 +145,7 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 
 	/* subclass list control */
 	lpFileListClass = this;
-	_hDefaultListProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hSelf, GWL_WNDPROC, reinterpret_cast<LONG>(wndDefaultListProc)));
+	_hDefaultListProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hSelf, GWLP_WNDPROC, (LONG_PTR)wndDefaultListProc));
 
 	/* set image list and icon */
 	_hImlParent = GetSmallImageList(FALSE);
@@ -154,7 +154,7 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 
 	/* get header control and subclass it */
 	hWndServer = _hHeader = ListView_GetHeader(_hSelf);
-	_hDefaultHeaderProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hHeader, GWL_WNDPROC, reinterpret_cast<LONG>(wndDefaultHeaderProc)));
+	_hDefaultHeaderProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hHeader, GWLP_WNDPROC, (LONG_PTR)wndDefaultHeaderProc));
 
 	/* set here the columns */
 	SetColumns();
@@ -675,12 +675,12 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 				{
 					case CDDS_PREPAINT:
 					{
-						SetWindowLongPtr(_hParent, DWL_MSGRESULT, (LONG)(CDRF_NOTIFYITEMDRAW));
+						SetWindowLongPtr(_hParent, DWLP_MSGRESULT, (LONG)(CDRF_NOTIFYITEMDRAW));
 						return TRUE;
 					}
 					case CDDS_ITEMPREPAINT:
 					{
-						SetWindowLongPtr(_hParent, DWL_MSGRESULT, (LONG)(CDRF_NOTIFYSUBITEMDRAW));
+						SetWindowLongPtr(_hParent, DWLP_MSGRESULT, (LONG)(CDRF_NOTIFYSUBITEMDRAW));
 						return TRUE;
 					}
 					case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
@@ -799,7 +799,7 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 						::DeleteObject(hBmp);
 						::DeleteDC(hMemDc);
 
-						SetWindowLongPtr(_hParent, DWL_MSGRESULT, (LONG)(CDRF_SKIPDEFAULT));
+						SetWindowLongPtr(_hParent, DWLP_MSGRESULT, (LONG)(CDRF_SKIPDEFAULT));
 						return TRUE;
 					}
 					default:
@@ -822,7 +822,7 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 				::GetCursorPos(&pt);
 				_lMouseTrackPos = pt.x;
 				_iMouseTrackItem = ((LPNMHEADER)lParam)->iItem;
-				SetWindowLongPtr(_hParent, DWL_MSGRESULT, TRUE);
+				SetWindowLongPtr(_hParent, DWLP_MSGRESULT, TRUE);
 
 				/* start hooking */
 				if (gWinVersion < WV_NT) {
@@ -875,7 +875,7 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 					ListView_SetColumnWidth(_hSelf, 0, iWidthMax + 24);
 					_lMouseTrackPos = 0;
 					
-					SetWindowLongPtr(_hParent, DWL_MSGRESULT, TRUE);
+					SetWindowLongPtr(_hParent, DWLP_MSGRESULT, TRUE);
 					return TRUE;
 				}
 				break;

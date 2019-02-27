@@ -42,8 +42,8 @@ void ComboOrgi::init(HWND hCombo)
 	comboBoxInfo.cbSize = sizeof(COMBOBOXINFO);
 
 	::SendMessage(_hCombo, CB_GETCOMBOBOXINFO, 0, (LPARAM)&comboBoxInfo);
-	::SetWindowLongPtr(comboBoxInfo.hwndItem, GWL_USERDATA, reinterpret_cast<LONG>(this));
-	_hDefaultComboProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(comboBoxInfo.hwndItem, GWL_WNDPROC, reinterpret_cast<LONG>(wndDefaultProc)));
+	::SetWindowLongPtr(comboBoxInfo.hwndItem, GWLP_USERDATA, (LONG_PTR)this);
+	_hDefaultComboProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(comboBoxInfo.hwndItem, GWLP_WNDPROC, (LONG_PTR)wndDefaultProc));
 }
 
 
