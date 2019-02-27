@@ -23,26 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Explorer.h"
 
-#ifndef CB_GETCOMBOBOXINFO
-#define	CB_GETCOMBOBOXINFO	0x0164
-#endif
-
 #ifdef _UNICODE
 #define string	wstring
 #endif
-
-#if(WINVER <= 0x0400)
-struct COMBOBOXINFO 
-{
-    int cbSize;
-    RECT rcItem;
-    RECT rcButton;
-    DWORD stateButton;
-    HWND hwndCombo;
-    HWND hwndItem;
-    HWND hwndList; 
-};
-#endif 
 
 class ComboOrgi
 {
@@ -78,7 +61,7 @@ private :
 
 	LRESULT runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK wndDefaultProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-		return (((ComboOrgi *)(::GetWindowLong(hwnd, GWL_USERDATA)))->runProc(hwnd, Message, wParam, lParam));
+		return (((ComboOrgi *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA)))->runProc(hwnd, Message, wParam, lParam));
 	};
 };
 

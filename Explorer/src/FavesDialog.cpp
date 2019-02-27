@@ -265,7 +265,7 @@ BOOL CALLBACK FavesDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, L
 						{
 							case CDDS_PREPAINT:
 							{
-								SetWindowLongPtr(_hSelf, DWL_MSGRESULT, (LONG)CDRF_NOTIFYITEMDRAW);
+								SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, (LONG)CDRF_NOTIFYITEMDRAW);
 								return TRUE;
 							}
 							case CDDS_ITEMPREPAINT:
@@ -282,7 +282,7 @@ BOOL CALLBACK FavesDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, L
 									}
 								}
 
-								SetWindowLongPtr(_hSelf, DWL_MSGRESULT, (LONG)CDRF_NOTIFYPOSTPAINT);
+								SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, (LONG)CDRF_NOTIFYPOSTPAINT);
 								return TRUE;
 							}
 							case CDDS_ITEMPOSTPAINT:
@@ -339,7 +339,7 @@ BOOL CALLBACK FavesDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, L
 
 								::SelectObject(lpCD->nmcd.hdc, _hFont);
 
-								SetWindowLongPtr(_hSelf, DWL_MSGRESULT, (LONG)CDRF_SKIPDEFAULT);
+								SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, (LONG)CDRF_SKIPDEFAULT);
 								return TRUE;
 							}
 							default:
@@ -563,8 +563,8 @@ void FavesDialog::InitialDialog(void)
 	_hFontUnder	= ::CreateFontIndirect(&lf);
 
 	/* subclass tree */
-	::SetWindowLongPtr(_hTreeCtrl, GWL_USERDATA, (LONG)this);
-	_hDefaultTreeProc = (WNDPROC)::SetWindowLongPtr(_hTreeCtrl, GWL_WNDPROC, (LONG)wndDefaultTreeProc);
+	::SetWindowLongPtr(_hTreeCtrl, GWLP_USERDATA, (LONG_PTR)this);
+	_hDefaultTreeProc = (WNDPROC)::SetWindowLongPtr(_hTreeCtrl, GWLP_WNDPROC, (LONG_PTR)wndDefaultTreeProc);
 
 	/* Load Image List */
 	_hImageListSys	= GetSmallImageList(TRUE);
