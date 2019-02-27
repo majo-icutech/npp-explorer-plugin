@@ -32,7 +32,7 @@ using namespace std;
 #define string	wstring
 #endif
 
-typedef enum {
+enum {
 	ICON_UPDATE_EVT_START,
 	ICON_UPDATE_EVT_RESP,
 	ICON_UPDATE_EVT_END,
@@ -93,7 +93,7 @@ protected:
 
 private:
 
-	typedef struct tItemList {
+	struct tItemList {
 		string	strName;
 		DWORD	dwAttributes;
 	};
