@@ -23,26 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Explorer.h"
 
-#ifndef CB_GETCOMBOBOXINFO
-#define	CB_GETCOMBOBOXINFO	0x0164
-#endif
-
 #ifdef _UNICODE
 #define string	wstring
 #endif
-
-#if(WINVER <= 0x0400)
-struct COMBOBOXINFO 
-{
-    int cbSize;
-    RECT rcItem;
-    RECT rcButton;
-    DWORD stateButton;
-    HWND hwndCombo;
-    HWND hwndItem;
-    HWND hwndList; 
-};
-#endif 
 
 class ComboOrgi
 {
