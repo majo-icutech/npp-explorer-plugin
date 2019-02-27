@@ -378,7 +378,8 @@ BOOL CALLBACK FavesDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, L
 
 				TCHAR	tip[MAX_PATH];
 				GetNameStrFromCmd(idButton, tip, sizeof(tip));
-				lpttt->lpszText = tip;
+				lstrcpy(lpttt->lpszText, tip);
+				return TRUE;
 			}
 
 			DockingDlgInterface::run_dlgProc(hWnd, Message, wParam, lParam);
