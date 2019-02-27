@@ -29,7 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <shellapi.h>
 #include <shlwapi.h>
+#pragma warning(push)
+#pragma warning(disable: 4091)
 #include <shlobj.h>
+#pragma warning(pop)
 
 extern winVer gWinVersion;
 
@@ -375,7 +378,8 @@ BOOL CALLBACK FavesDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, L
 
 				TCHAR	tip[MAX_PATH];
 				GetNameStrFromCmd(idButton, tip, sizeof(tip));
-				lpttt->lpszText = tip;
+				lstrcpy(lpttt->lpszText, tip);
+				return TRUE;
 			}
 
 			DockingDlgInterface::run_dlgProc(hWnd, Message, wParam, lParam);

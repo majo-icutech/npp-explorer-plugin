@@ -246,6 +246,7 @@ UINT ToolBar::doPopop(POINT chevPoint) {
 			/* get text over tooltip function */
 			ttt.hdr.code	= TTN_GETDISPINFO;
 			ttt.hdr.idFrom	= cmd;
+			ttt.lpszText	= new TCHAR[MAX_PATH];
 			if (cmd != 0)
 			{
 				::SendMessage(_hParent, WM_NOTIFY, cmd, (LPARAM)&ttt);
@@ -257,6 +258,7 @@ UINT ToolBar::doPopop(POINT chevPoint) {
 			} else if (elements != 0) {
 				AppendMenu(menu, MF_SEPARATOR, 0, TEXT(""));
 			}
+			delete[] ttt.lpszText;
 			elements++;
 			start++;
 		}

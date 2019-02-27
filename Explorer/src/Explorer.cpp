@@ -33,7 +33,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#include <fstream>
 #include <shellapi.h>
 #include <shlwapi.h>
+#pragma warning(push)
+#pragma warning(disable: 4091)
 #include <shlobj.h>
+#pragma warning(pop)
 #include <dbt.h>
 #include <atlbase.h>
 
@@ -868,7 +871,7 @@ void ExtractIcons(LPCTSTR currentPath, LPCTSTR volumeName, eDevType type,
 	}
 
 	if (_tcsstr(TEMP, _T("C:\\Users\\Public\\"))) {
-		_stprintf(TEMP, _T("  TYPE   %d\n  Normal %d\n  Selected %d\n"), *piIconNormal, *piIconSelected);
+		_stprintf(TEMP, _T("  TYPE   %d\n  Normal %d\n  Selected %d\n"), type, *piIconNormal, *piIconSelected);
 		OutputDebugString(TEMP);
 	}
 }
