@@ -1,9 +1,13 @@
 # npp-explorer-plugin
+[![Build status](https://ci.appveyor.com/api/projects/status/0wi7na0rng1k3df3?svg=true)](https://ci.appveyor.com/project/oviradoi/npp-explorer-plugin)
+
 This is a modified version of the [Explorer] plugin for [Notepad++].
 
 The goal was:
 - to fix an annoying bug that caused the toolbar's tooltip of the plugin to display garbage text.
 - make the fg/bg colors of the listview and the treeview in the plugin to always match the current Notepad++ theme.
+- to fix a bug that caused icons to be displayed incorrectly
+- to make the plugin 64-bit compatible
 
 ## Installation
 For now you can just drop the **Explorer.dll** into NPP's plugins folder -
@@ -18,5 +22,5 @@ See [here][original] for the original license as published by the author of this
 
 [Explorer]: http://sourceforge.net/projects/npp-plugins/files/Explorer/
 [Notepad++]: http://notepad-plus-plus.org/
-[screenshot]: https://github.com/kobilutil/npp-explorer-plugin/raw/master/images/screenshot.png "Screenshot"
-[original]: https://github.com/kobilutil/npp-explorer-plugin/tree/master/Explorer
+[screenshot]: https://raw.githubusercontent.com/oviradoi/npp-explorer-plugin/master/images/screenshot.png "Screenshot"
+[original]: https://github.com/oviradoi/npp-explorer-plugin/tree/master/Explorer
