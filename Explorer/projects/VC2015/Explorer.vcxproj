@@ -75,7 +75,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Comctl32.lib;Mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;Mpr.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <Midl>
@@ -98,7 +98,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Comctl32.lib;Mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;Mpr.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <Midl>
@@ -120,7 +120,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXPLORER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;shlwapi.lib;Mpr.lib;comctl32.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;shlwapi.lib;Mpr.lib;comctl32.lib;Msimg32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -144,7 +144,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXPLORER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;shlwapi.lib;Mpr.lib;comctl32.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;shlwapi.lib;Mpr.lib;comctl32.lib;Msimg32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>

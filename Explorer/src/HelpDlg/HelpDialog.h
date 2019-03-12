@@ -60,6 +60,8 @@ private:
 	/* for eMail */
     URLCtrl			_emailLink;
 	URLCtrl			_urlNppPlugins;
+
+	void setVersionString();
 };
 
 

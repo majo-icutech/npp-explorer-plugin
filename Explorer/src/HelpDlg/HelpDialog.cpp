@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "HelpDialog.h"
 #include "Explorer.h"
+#include "atlstr.h"
 
 
 void HelpDlg::doDialog()
@@ -42,6 +43,8 @@ BOOL CALLBACK HelpDlg::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARA
             _urlNppPlugins.init(_hInst, _hSelf);
             _urlNppPlugins.create(::GetDlgItem(_hSelf, IDC_NPP_PLUGINS_URL), _T("http://sourceforge.net/projects/npp-plugins/"));
 
+			setVersionString();
+
 			/* change language */
 			NLChangeDialog(_hInst, _nppData._nppHandle, _hSelf, _T("Help"));
 
@@ -62,5 +65,45 @@ BOOL CALLBACK HelpDlg::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARA
 		}
 	}
 	return FALSE;
+}
+
+void HelpDlg::setVersionString()
+{
+	TCHAR szFilename[MAX_PATH];
+	if (!GetWindowModuleFileName(_hSelf, szFilename, MAX_PATH))
+	{
+		return;
+	}
+
+	DWORD dummy;
+	DWORD dwSize = GetFileVersionInfoSize(szFilename, &dummy);
+	if (dwSize == 0)
+	{
+		return;
+	}
+
+	std::vector<BYTE> data(dwSize);
+	if (!GetFileVersionInfo(szFilename, NULL, dwSize, &data[0]))
+	{
+		return;
+	}
+
+	UINT                uiVerLen = 0;
+	VS_FIXEDFILEINFO*   pFixedInfo = 0;
+	if (!VerQueryValue(&data[0], TEXT("\\"), (void**)&pFixedInfo, (UINT *)&uiVerLen))
+	{
+		return;
+	}
+
+	CString strProductVersion;
+
+	strProductVersion.Format(_T("v%u.%u.%u.%u"),
+		HIWORD(pFixedInfo->dwProductVersionMS),
+		LOWORD(pFixedInfo->dwProductVersionMS),
+		HIWORD(pFixedInfo->dwProductVersionLS),
+		LOWORD(pFixedInfo->dwProductVersionLS));
+
+	HWND versionCtrl = GetDlgItem(_hSelf, IDC_STATIC_VERSION);
+	SetWindowText(versionCtrl, strProductVersion);
 }
 
