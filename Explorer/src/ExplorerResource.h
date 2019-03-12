@@ -127,8 +127,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 	#define IDC_BTN_EXAMPLE_FILE			(IDD_OPTION_DLG + 21)
 
 #define    IDD_HELP_DLG	     30700         
-    #define IDC_EMAIL_LINK                  (IDD_HELP_DLG + 1)
-	#define IDC_NPP_PLUGINS_URL				(IDD_HELP_DLG + 2)
+	#define IDC_SYSLINK_ORIGURL				(IDD_HELP_DLG + 1)
+	#define IDC_SYSLINK_CRTURL				(IDD_HELP_DLG + 2)
 	#define IDC_STATIC_AUTHOR               (IDD_HELP_DLG + 3)
 	#define IDC_STATIC_MAIL                 (IDD_HELP_DLG + 4)
 	#define IDC_STATIC_THXTO                (IDD_HELP_DLG + 5)
@@ -141,7 +141,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 	#define IDC_STATIC_HELP                 (IDD_HELP_DLG + 12)
 	#define IDC_STATIC_TITLE				(IDD_HELP_DLG + 13)
 	#define IDC_STATIC_VERSION				(IDD_HELP_DLG + 14)
-
+	#define IDC_SYSLINK_EMAIL				(IDD_HELP_DLG + 15)
 
 /* Explorer messages */
 

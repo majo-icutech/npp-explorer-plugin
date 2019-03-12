@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "StaticDialog.h"
 #include "Explorer.h"
-#include "URLCtrl.h"
 
 #include "ExplorerResource.h"
 
@@ -43,12 +42,6 @@ public:
 
    	void doDialog();
 
-    virtual void destroy() {
-        _emailLink.destroy();
-		_urlNppPlugins.destroy();
-    };
-
-
 protected :
 	virtual BOOL CALLBACK run_dlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -56,10 +49,6 @@ private:
 	/* Handles */
 	NppData			_nppData;
     HWND			_HSource;
-	
-	/* for eMail */
-    URLCtrl			_emailLink;
-	URLCtrl			_urlNppPlugins;
 
 	void setVersionString();
 };

@@ -27,27 +27,32 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // Dialog
 //
 
-IDD_HELP_DLG DIALOGEX 0, 0, 230, 192
+IDD_HELP_DLG DIALOGEX 0, 0, 256, 214
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_BORDER | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "Go to Path...\t\tLink to a given directory",IDC_STATIC_GOTO,17,121,197,8
-    DEFPUSHBUTTON   "&Ok",IDOK,89,171,50,14
-    LTEXT           "jens.plugin.npp@gmx.de",IDC_EMAIL_LINK,65,41,80,8
+    LTEXT           "Go to Path...\t\tLink to a given directory",IDC_STATIC_GOTO,17,142,197,8
+    DEFPUSHBUTTON   "&Ok",IDOK,89,193,50,14
     LTEXT           "Author:",IDC_STATIC_AUTHOR,12,31,51,9
-    GROUPBOX        "Menu entries",IDC_STATIC_MENU,7,95,216,72
+    GROUPBOX        "Menu entries",IDC_STATIC_MENU,7,115,241,72
     LTEXT           "eMail:",IDC_STATIC_MAIL,12,41,51,8
-    CTEXT           "At first, I would like to thank Don for his great program and his support to create this plugin.",IDC_STATIC_THXTO,7,67,213,25
-    LTEXT           "Options...\t\tAllows you to personalize the\n\t\t\tsettings for explorers file list.",IDC_STATIC_OPT,17,137,197,16
-    LTEXT           "Explorer Plugin for Notepad++",IDC_STATIC_TITLE,7,7,159,17,SS_CENTERIMAGE,WS_EX_DLGMODALFRAME | WS_EX_TRANSPARENT
-    LTEXT           "http://sourceforge.net/projects/npp-plugins/",IDC_NPP_PLUGINS_URL,65,52,155,8
-    LTEXT           "URL:",IDC_STATIC,12,52,51,8
+    CTEXT           "At first, I would like to thank Don for his great program and his support to create this plugin.",IDC_STATIC_THXTO,8,84,238,25
+    LTEXT           "Options...\t\tAllows you to personalize the\n\t\t\tsettings for explorers file list.",IDC_STATIC_OPT,17,158,197,16
+    LTEXT           "Explorer Plugin for Notepad++",IDC_STATIC_TITLE,7,7,185,17,SS_CENTERIMAGE,WS_EX_DLGMODALFRAME | WS_EX_TRANSPARENT
+    LTEXT           "Original URL:",IDC_STATIC,12,52,51,8
     LTEXT           "Jens Lorenz",IDC_STATIC,65,31,39,8
-    LTEXT           "Explorer...\t\tViews the Explorer dialog.",IDC_STATIC_EXP,17,105,197,8
-    LTEXT           "Favorites...\t\tViews the Favorites dialog.",IDC_STATIC_FAV,17,113,197,8
-    LTEXT           "Help...\t\t\tShows this help dialog.",IDC_STATIC_HELP,17,153,197,8
-    LTEXT           "Clear Filter\t\tDeletes all filter elements",IDC_STATIC_CLEAR,17,129,197,8
-    RTEXT           "version",IDC_STATIC_VERSION,166,7,57,17,SS_CENTERIMAGE,WS_EX_DLGMODALFRAME | WS_EX_TRANSPARENT
+    LTEXT           "Explorer...\t\tViews the Explorer dialog.",IDC_STATIC_EXP,17,126,197,8
+    LTEXT           "Favorites...\t\tViews the Favorites dialog.",IDC_STATIC_FAV,17,134,197,8
+    LTEXT           "Help...\t\t\tShows this help dialog.",IDC_STATIC_HELP,17,174,197,8
+    LTEXT           "Clear Filter\t\tDeletes all filter elements",IDC_STATIC_CLEAR,17,150,197,8
+    RTEXT           "version",IDC_STATIC_VERSION,192,7,57,17,SS_CENTERIMAGE,WS_EX_DLGMODALFRAME | WS_EX_TRANSPARENT
+    CONTROL         "<a href=""mailto:jens.plugin.npp@gmx.de"">jens.plugin.npp@gmx.de</a>",IDC_SYSLINK_EMAIL,
+                    "SysLink",0x0,66,41,176,10
+    CONTROL         "<a href=""https://sourceforge.net/projects/npp-plugins"">https://sourceforge.net/projects/npp-plugins</a>",IDC_SYSLINK_ORIGURL,
+                    "SysLink",0x0,66,53,176,9
+    LTEXT           "URL:",IDC_STATIC,12,65,51,8
+    CONTROL         "<a href=""https://github.com/oviradoi/npp-explorer-plugin"">https://github.com/oviradoi/npp-explorer-plugin</a>",IDC_SYSLINK_CRTURL,
+                    "SysLink",0x0,66,64,177,9
 END
 
 IDD_EXPLORER_DLG DIALOGEX 64536, 0, 164, 267
@@ -165,9 +170,9 @@ BEGIN
     IDD_HELP_DLG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 223
+        RIGHTMARGIN, 249
         TOPMARGIN, 7
-        BOTTOMMARGIN, 185
+        BOTTOMMARGIN, 207
     END
 
     IDD_EXPLORER_DLG, DIALOG

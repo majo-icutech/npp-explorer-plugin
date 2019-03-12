@@ -37,12 +37,6 @@ BOOL CALLBACK HelpDlg::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARA
 	{
         case WM_INITDIALOG :
 		{
-            _emailLink.init(_hInst, _hSelf);
-            _emailLink.create(::GetDlgItem(_hSelf, IDC_EMAIL_LINK), _T("mailto:jens.plugin.npp@gmx.de"));
-
-            _urlNppPlugins.init(_hInst, _hSelf);
-            _urlNppPlugins.create(::GetDlgItem(_hSelf, IDC_NPP_PLUGINS_URL), _T("http://sourceforge.net/projects/npp-plugins/"));
-
 			setVersionString();
 
 			/* change language */
@@ -61,6 +55,17 @@ BOOL CALLBACK HelpDlg::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARA
 
 				default :
 					break;
+			}
+		}
+		case WM_NOTIFY:
+		{
+			LPNMHDR nmhdr = (LPNMHDR)lParam;
+			if ((nmhdr->code == NM_CLICK || nmhdr->code == NM_RETURN) && 
+				(nmhdr->idFrom == IDC_SYSLINK_EMAIL || nmhdr->idFrom == IDC_SYSLINK_ORIGURL || nmhdr->idFrom == IDC_SYSLINK_CRTURL))
+			{
+				PNMLINK pNMLink = (PNMLINK)lParam;
+				LITEM   item = pNMLink->item;
+				ShellExecute(NULL, _T("open"), item.szUrl, NULL, NULL, SW_SHOWNORMAL);
 			}
 		}
 	}
