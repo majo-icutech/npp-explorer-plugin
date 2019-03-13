@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef TREEHELPERCLASS_H
 #define TREEHELPERCLASS_H
 
-#include <windows.h>
 #include <commctrl.h>
 #include <vector>
 #include <string>

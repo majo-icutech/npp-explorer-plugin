@@ -21,18 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef EXPLORER_H
 #define EXPLORER_H
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <zmouse.h>
-#include <windowsx.h>
 #include <commctrl.h>
-#include <tchar.h>
 
 #include "PluginInterface.h"
 #include "Notepad_plus_rc.h"
 #include "NativeLang_def.h"
 
-#include <TCHAR.H>
+#include <tchar.h>
 #include <vector>
 using namespace std;
 

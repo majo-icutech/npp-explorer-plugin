@@ -27,13 +27,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ToolTip.h"
 #include "window.h"
 #include "DragDropImpl.h"
-#include <commctrl.h>
-#include <shlwapi.h>
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #include <shlobj.h>
 #pragma warning(pop)
-#include <shellapi.h>
 
 #ifdef _UNICODE
 #define string	wstring

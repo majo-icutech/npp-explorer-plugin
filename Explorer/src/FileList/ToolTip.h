@@ -20,13 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef __TOOLTIP_H__
 #define __TOOLTIP_H__
 
-#include <string>
 #include "Explorer.h"
 #include "Window.h"
-#include <commctrl.h>
-
-
-using namespace std;
 
 class ToolTip : public Window
 {

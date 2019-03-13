@@ -28,25 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef	CONTEXTMENU_DEFINE_H
 #define CONTEXTMENU_DEFINE_H
 
-#include "Explorer.h"
-#include "ExplorerResource.h"
-#include "NewDlg.h"
-#include "window.h"
-#include <malloc.h>
 #include <vector>
-#include <string>
-#include <commctrl.h>
-#pragma warning(push)
-#pragma warning(disable: 4091)
-#include <shlobj.h>
-#pragma warning(pop)
-#include <shlwapi.h>
-#include <shellapi.h>
-
 using namespace std;
 
-
-struct __declspec(uuid("000214e6-0000-0000-c000-000000000046")) IShellFolder;
+#include "NewDlg.h"
 
 typedef struct
 {

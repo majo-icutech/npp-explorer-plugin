@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "resource.h"
 #include <dbt.h>
 
+#include <windowsx.h>
 #include <shellapi.h>
 #include <shlwapi.h>
 #pragma warning(push)

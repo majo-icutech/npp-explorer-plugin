@@ -5,3 +5,7 @@
 
 #include <shellapi.h>
 #include <shlwapi.h>
+
+#include <vector>
+#include <tchar.h>
+#include <string>

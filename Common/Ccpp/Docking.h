@@ -21,8 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef DOCKING_H
 #define DOCKING_H
 
-
-#include "windows.h"
+#include <WinDef.h>
 
 //   defines for docking manager
 #define	CONT_LEFT		0

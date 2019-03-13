@@ -28,10 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "FileDlg.h"
 #include "ExplorerResource.h"
 #include "TreeHelperClass.h"
-#include <vector>
-
-using namespace std;
-
 
 typedef enum {
 	LINK_DLG_NONE,

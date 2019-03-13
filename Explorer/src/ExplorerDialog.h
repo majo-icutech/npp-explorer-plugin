@@ -26,10 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "FileList.h"
 #include "ComboOrgi.h"
 #include "Toolbar.h"
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <shlwapi.h>
 
 #include "Explorer.h"
 #include "ExplorerResource.h"
