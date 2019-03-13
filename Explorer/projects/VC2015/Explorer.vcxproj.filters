@@ -81,8 +81,8 @@
     <ClCompile Include="..\..\..\Common\Ccpp\ToolBar.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Common\Ccpp\stdafx.cpp">
-      <Filter>Source Files\Common</Filter>
+    <ClCompile Include="..\..\src\stdafx.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,14 +172,14 @@
     <ClInclude Include="..\..\..\Common\Ccpp\Window.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Ccpp\stdafx.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\NativeLang\src\NativeLang_def.h">
       <Filter>Header Files\NativeLang</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\MISC\nppexec_msgs.h">
       <Filter>Header Files\NppExec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\stdafx.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

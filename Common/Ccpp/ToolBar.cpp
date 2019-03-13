@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //#include "..\..\resource.h"
+#include "stdafx.h"
 #include "ToolBar.h"
 #include "SysMsg.h"
 

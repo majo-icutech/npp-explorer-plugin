@@ -7,6 +7,7 @@
 **************************************************************************/
 // IDataObjectImpl.cpp: implementation of the CIDataObjectImpl class.
 //////////////////////////////////////////////////////////////////////
+#include "stdafx.h"
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #include <shlobj.h>
