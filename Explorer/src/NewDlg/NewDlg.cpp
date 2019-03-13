@@ -19,14 +19,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 #include "NewDlg.h"
-#include "stdio.h"
 
+#include "Explorer.h"
+
+#include "ExplorerResource.h"
+
+NewDlg::NewDlg() : StaticDialog() 
+{
+}
+
+void NewDlg::init(HINSTANCE hInst, HWND hWnd, LPTSTR pszWndName) {
+	Window::init(hInst, hWnd);
+	_pszWndName = pszWndName;
+}
 
 UINT NewDlg::doDialog(LPTSTR pFileName, LPTSTR pDesc)
 {
 	_pFileName = pFileName;
 	_pDesc = pDesc;
 	return ::DialogBoxParam(_hInst, MAKEINTRESOURCE(IDD_NEW_DLG), _hParent,  (DLGPROC)dlgProc, (LPARAM)this);
+}
+
+void NewDlg::destroy() 
+{
 }
 
 

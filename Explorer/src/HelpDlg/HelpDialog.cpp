@@ -23,6 +23,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "atlstr.h"
 #include "shellapi.h"
 
+#include "ExplorerResource.h"
+
+
+HelpDlg::HelpDlg() : StaticDialog() {}
+
+void HelpDlg::init(HINSTANCE hInst, NppData nppData)
+{
+	_nppData = nppData;
+	Window::init(hInst, nppData._nppHandle);
+}
 
 void HelpDlg::doDialog()
 {

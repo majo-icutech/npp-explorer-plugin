@@ -22,8 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define NEW_DLG_DEFINE_H
 
 #include "StaticDialog.h"
-#include "Explorer.h"
-#include "ExplorerResource.h"
 
 
 
@@ -31,16 +29,13 @@ class NewDlg : public StaticDialog
 {
 
 public:
-	NewDlg() : StaticDialog() {};
+	NewDlg();
     
-    void init(HINSTANCE hInst, HWND hWnd, LPTSTR pszWndName = NULL) {
-		Window::init(hInst, hWnd);
-		_pszWndName = pszWndName;
-	};
+	void init(HINSTANCE hInst, HWND hWnd, LPTSTR pszWndName = NULL);
 
    	UINT doDialog(LPTSTR pFileName, LPTSTR pDesc);
 
-    virtual void destroy() {};
+	virtual void destroy();
 
 
 protected :
@@ -50,7 +45,6 @@ private:
 	LPTSTR			_pszWndName;
 	LPTSTR			_pFileName;
 	LPTSTR			_pDesc;
-
 };
 
 

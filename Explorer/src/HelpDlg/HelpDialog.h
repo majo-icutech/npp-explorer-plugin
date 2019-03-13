@@ -24,21 +24,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "StaticDialog.h"
 #include "Explorer.h"
 
-#include "ExplorerResource.h"
-
-
-
 class HelpDlg : public StaticDialog
 {
 
 public:
-	HelpDlg() : StaticDialog() {};
+	HelpDlg();
     
-    void init(HINSTANCE hInst, NppData nppData)
-	{
-		_nppData = nppData;
-		Window::init(hInst, nppData._nppHandle);
-	};
+	void init(HINSTANCE hInst, NppData nppData);
 
    	void doDialog();
 
