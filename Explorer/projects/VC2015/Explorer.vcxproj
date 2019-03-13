@@ -74,6 +74,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;EXPLORER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Comctl32.lib;Mpr.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -98,6 +99,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;EXPLORER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Comctl32.lib;Mpr.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -121,6 +123,7 @@
       <AdditionalIncludeDirectories>..\..\..\Common\Ccpp;..\..\src\NewDlg\;..\..\src\PropDlg\;..\..\src\FileDlg\;..\..\src\FileList\;.;..\..\src\;..\..\src\MISC\;..\..\src\HelpDlg\;..\..\src\OptionDlg\;..\..\src\PureDnD\;..\..\..\NativeLang\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXPLORER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;shlwapi.lib;Mpr.lib;comctl32.lib;Msimg32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -146,6 +149,7 @@
       <AdditionalIncludeDirectories>..\..\..\Common\Ccpp;..\..\src\NewDlg\;..\..\src\PropDlg\;..\..\src\FileDlg\;..\..\src\FileList\;.;..\..\src\;..\..\src\MISC\;..\..\src\HelpDlg\;..\..\src\OptionDlg\;..\..\src\PureDnD\;..\..\..\NativeLang\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXPLORER_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;shlwapi.lib;Mpr.lib;comctl32.lib;Msimg32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
