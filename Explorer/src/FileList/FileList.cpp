@@ -1897,15 +1897,15 @@ void FileList::GetDate(FILETIME ftLastWriteTime, string & str)
 {
 	FILETIME		ftLocalTime;
 	SYSTEMTIME		sysTime;
-	TCHAR			TEMP[16];
+	TCHAR			TEMP[32];
 
 	FileTimeToLocalFileTime(&ftLastWriteTime, &ftLocalTime);
 	FileTimeToSystemTime(&ftLocalTime, &sysTime);
 
 	if (_pExProp->fmtDate == DFMT_ENG)
-		_stprintf(TEMP, _T("%02d/%02d/%02d %02d:%02d"), sysTime.wYear % 100, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute);
+		_stprintf_s(TEMP, 32, _T("%02d/%02d/%02d %02d:%02d"), sysTime.wYear % 100, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute);
 	else
-		_stprintf(TEMP, _T("%02d.%02d.%04d %02d:%02d"), sysTime.wDay, sysTime.wMonth, sysTime.wYear, sysTime.wHour, sysTime.wMinute);
+		_stprintf_s(TEMP, 32, _T("%02d.%02d.%04d %02d:%02d"), sysTime.wDay, sysTime.wMonth, sysTime.wYear, sysTime.wHour, sysTime.wMinute);
 
 	str = TEMP;
 }
