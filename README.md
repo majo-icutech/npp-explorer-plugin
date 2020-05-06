@@ -11,17 +11,17 @@ The goal was:
 
 ## Installation
 
-Prior to Notepad++ v7.6, you could just drop the **Explorer.dll** into NPP's plugins folder -
+It's easiest to just use the **Plugins > Plugins Admin** menu item built into Notepad++ v7.6.3 and newer.
+
+For older versions (prior to Notepad++ v7.6), you could just drop the **Explorer.dll** into NPP's plugins folder -
 
 * 32-bit Notepad++: `C:\Program Files (x86)\Notepad++\plugins`
 * 64-bit Notepad++: `C:\Program Files\Notepad++\plugins`
 
-With Notepad++ v7.6.3 and later, you need to put it into a subdirectory named **Explorer**, as in
+For manual installation in Notepad++ v7.6.3 and newer, you need to put it into a subdirectory named **Explorer**, as in
 
 * 32-bit Notepad++: `C:\Program Files (x86)\Notepad++\plugins\Explorer\`
 * 64-bit Notepad++: `C:\Program Files\Notepad++\plugins\Explorer\`
-
-However, it's easiest to just use the **Plugins > Plugins Admin** menu item built into Notepad++ v7.6.3 and newer.
 
 ### Requirements
 
