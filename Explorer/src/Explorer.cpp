@@ -479,7 +479,8 @@ HWND getCurrentHScintilla(INT which)
 
 void toggleExplorerDialog(void)
 {
-	UINT state = ::GetMenuState(::GetMenu(nppData._nppHandle), funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, MF_BYCOMMAND);
+	HMENU menu = (HMENU)::SendMessage(nppData._nppHandle, NPPM_GETMENUHANDLE, DOCKABLE_EXPLORER_INDEX, 0);
+	UINT state = ::GetMenuState(menu, funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, MF_BYCOMMAND);
 	if (state & MF_CHECKED) {
 		explorerDlg.doDialog(false);
 	} else {
@@ -490,7 +491,8 @@ void toggleExplorerDialog(void)
 
 void toggleFavesDialog(void)
 {
-	UINT state = ::GetMenuState(::GetMenu(nppData._nppHandle), funcItem[DOCKABLE_FAVORTIES_INDEX]._cmdID, MF_BYCOMMAND);
+	HMENU menu = (HMENU)::SendMessage(nppData._nppHandle, NPPM_GETMENUHANDLE, DOCKABLE_FAVORTIES_INDEX, 0);
+	UINT state = ::GetMenuState(menu, funcItem[DOCKABLE_FAVORTIES_INDEX]._cmdID, MF_BYCOMMAND);
 	if (state & MF_CHECKED) {
 		favesDlg.doDialog(false);
 	} else {
@@ -501,7 +503,8 @@ void toggleFavesDialog(void)
 
 void gotoPath(void)
 {
-	UINT state = ::GetMenuState(::GetMenu(nppData._nppHandle), funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, MF_BYCOMMAND);
+	HMENU menu = (HMENU)::SendMessage(nppData._nppHandle, NPPM_GETMENUHANDLE, DOCKABLE_EXPLORER_INDEX, 0);
+	UINT state = ::GetMenuState(menu, funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, MF_BYCOMMAND);
 	if (state & MF_UNCHECKED) {
 		explorerDlg.doDialog();
 	}
