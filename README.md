@@ -25,7 +25,9 @@ For manual installation in Notepad++ v7.6.3 and newer, you need to put it into a
 
 ### Installation Requirements
 
-This plugin requires the Microsoft Visual C++ Redistributable 2015 (or 2015/2017/2019), which can be downloaded from Microsoft at https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
+Versions before and including 1.8.8 requires the Microsoft Visual C++ Redistributable 2015 (or 2015/2017/2019), which can be downloaded from Microsoft at https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
+
+Starting from version 1.8.9, this redistributable is not required anymore.
 
 ## Screenshot
 ![screenshot]
