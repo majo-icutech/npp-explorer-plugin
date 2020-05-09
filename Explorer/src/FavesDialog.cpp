@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ToolTip.h"
 #include "resource.h"
 #include <dbt.h>
+#include <algorithm>
 
 #include <windowsx.h>
 #include <shellapi.h>
@@ -74,10 +75,6 @@ void FavesDialog::GetNameStrFromCmd(UINT resID, LPTSTR tip, UINT count)
 		_tcscpy(tip, szToolTip[resID - IDM_EX_LINK_NEW_FILE]);
 	}
 }
-
-static vector<TItemElement>::iterator HACK_from_pElem_to_iterator(vector<TItemElement>& vElements, PELEM pElem);
-
-
 
 FavesDialog::FavesDialog(void) : DockingDlgInterface(IDD_EXPLORER_DLG)
 {
@@ -716,7 +713,7 @@ void FavesDialog::PasteItem(HTREEITEM hItem)
 
 			delete [] pElemCC->pszName;
 			delete [] pElemCC->pszLink;
-			pParentElem->vElements.erase(HACK_from_pElem_to_iterator(pParentElem->vElements, pElemCC));
+			pParentElem->vElements.erase(find_if(pParentElem->vElements.begin(), pParentElem->vElements.end(), [&pElemCC](const TItemElement& e) -> bool {return &e == pElemCC; }));
 
 			/* update information and delete element */
 			UpdateLink(hParentItem);
@@ -1174,10 +1171,11 @@ void FavesDialog::DeleteItem(HTREEITEM hItem)
 
 	if (!(pElem->uParam & FAVES_PARAM_MAIN))
 	{
+		PELEM pParent = (PELEM)GetParam(hItemParent);
+
 		/* delete child elements */
 		DeleteRecursive(pElem);
-		((PELEM)GetParam(hItemParent))->vElements.erase(
-			HACK_from_pElem_to_iterator(((PELEM)GetParam(hItemParent))->vElements, pElem));
+		pParent->vElements.erase(find_if(pParent->vElements.begin(), pParent->vElements.end(), [&pElem](const TItemElement& e) -> bool {return &e == pElem; }));
 
 		/* update information and delete element */
 		TreeView_DeleteItem(_hTreeCtrl, hItem);
@@ -2178,10 +2176,4 @@ void FavesDialog::SaveElementTreeRecursive(PELEM pElem, HANDLE hFile)
 			delete [] temp;
 		}
 	}
-}
-
-vector<TItemElement>::iterator HACK_from_pElem_to_iterator(vector<TItemElement>& vElements, PELEM pElem)
-{
-	auto it = vElements.begin() + (pElem - &(*vElements.begin())) / sizeof(TItemElement);
-	return it;
 }
