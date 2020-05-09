@@ -255,7 +255,7 @@ extern "C" __declspec(dllexport) LPCTSTR getName()
 	return PLUGIN_NAME;
 }
 
-extern "C" __declspec(dllexport) FuncItem * getFuncsArray(INT *nbF)
+extern "C" __declspec(dllexport) FuncItem * getFuncsArray(int *nbF)
 {
 	*nbF = nbFunc;
 	return funcItem;

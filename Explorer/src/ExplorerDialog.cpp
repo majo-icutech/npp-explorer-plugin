@@ -234,7 +234,7 @@ void ExplorerDialog::doDialog(bool willBeShown)
 }
 
 
-BOOL CALLBACK ExplorerDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (Message) 
 	{
@@ -395,7 +395,7 @@ BOOL CALLBACK ExplorerDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam
 				return TRUE;
 			}
 
-			DockingDlgInterface::run_dlgProc(hWnd, Message, wParam, lParam);
+			DockingDlgInterface::run_dlgProc(Message, wParam, lParam);
 
 		    return FALSE;
 		}
@@ -750,7 +750,7 @@ BOOL CALLBACK ExplorerDialog::run_dlgProc(HWND hWnd, UINT Message, WPARAM wParam
 			return TRUE;
 		}
 		default:
-			return DockingDlgInterface::run_dlgProc(hWnd, Message, wParam, lParam);
+			return DockingDlgInterface::run_dlgProc(Message, wParam, lParam);
 	}
 
 	return FALSE;
