@@ -404,10 +404,21 @@ void loadSettings(void)
 	{
 		_stprintf(number, _T("%d"), i);
 		if (::GetPrivateProfileString(FilterHistory, number, _T(""), pszTemp, MAX_PATH, iniFilePath) != 0)
-			exProp.vStrFilterHistory.push_back(pszTemp);
+		{
+#ifdef UNICODE
+			exProp.vStrFilterHistory.push_back(wstring(pszTemp));
+#else
+			exProp.vStrFilterHistory.push_back(string(pszTemp));
+#endif
+		}
 	}
 	::GetPrivateProfileString(Explorer, LastFilter, _T("*.*"), pszTemp, MAX_PATH, iniFilePath);
-	exProp.strLastFilter = pszTemp;
+
+#ifdef UNICODE
+	exProp.strLastFilter = wstring(pszTemp);
+#else
+	exProp.strLastFilter = string(pszTemp);
+#endif
 
 	if (::PathFileExists(exProp.szCurrentPath) == FALSE)
 		_tcscpy(exProp.szCurrentPath, _T("C:\\"));
