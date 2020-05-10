@@ -110,8 +110,6 @@ protected:
 
 	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
 
-	void GetNameStrFromCmd(UINT idButton, LPTSTR tip, UINT count);
-
 	void InitialDialog(void);
 
 	void UpdateDevices(void);

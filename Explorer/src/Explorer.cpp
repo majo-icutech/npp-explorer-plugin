@@ -29,14 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "SysMsg.h"
 #include <stdlib.h>
 #include <iostream>
-// TODO: investigate why this include cause double definition error
-//#include <fstream>
 #include <shellapi.h>
 #include <shlwapi.h>
-#pragma warning(push)
-#pragma warning(disable: 4091)
 #include <shlobj.h>
-#pragma warning(pop)
 #include <dbt.h>
 #include <atlbase.h>
 
@@ -44,8 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 CONST INT	nbFunc	= 9;
-
-
 
 /* information for notepad */
 CONST TCHAR  PLUGIN_NAME[] = _T("&Explorer");
@@ -57,8 +50,6 @@ TCHAR		iniFilePath[MAX_PATH];
 CONST TCHAR WindowData[]		= _T("WindowData");
 CONST TCHAR Explorer[]			= _T("Explorer");
 CONST TCHAR Faves[]				= _T("Faves");
-
-
 
 /* section Explorer */
 CONST TCHAR LastPath[]			= _T("LastPath");
@@ -282,8 +273,6 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *notifyCode)
 		if (notifyCode->nmhdr.code == NPPN_TBMODIFICATION)
 		{
 			/* change menu language */
-			NLChangeNppMenu((HINSTANCE)g_hModule, nppData._nppHandle, PLUGIN_NAME, funcItem, nbFunc);
-
 			g_TBExplorer.hToolbarBmp = (HBITMAP)::LoadImage((HINSTANCE)g_hModule, MAKEINTRESOURCE(IDB_TB_EXPLORER), IMAGE_BITMAP, 0, 0, (LR_DEFAULTSIZE | LR_LOADMAP3DCOLORS));
 			g_TBFaves.hToolbarBmp = (HBITMAP)::LoadImage((HINSTANCE)g_hModule, MAKEINTRESOURCE(IDB_TB_FAVES), IMAGE_BITMAP, 0, 0, (LR_DEFAULTSIZE | LR_LOADMAP3DCOLORS));
 			::SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON, (WPARAM)funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, (LPARAM)&g_TBExplorer);
@@ -577,14 +566,6 @@ LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARA
 			ret = ::CallWindowProc(wndProcNotepad, hWnd, message, wParam, lParam);
 			break;
 		}
-		case WM_COMMAND:
-		{
-			if (wParam == IDM_FILE_SAVESESSION)
-			{
-				favesDlg.SaveSession();
-				return TRUE;
-			}
-		}
 		default:
 			ret = ::CallWindowProc(wndProcNotepad, hWnd, message, wParam, lParam);
 			break;
@@ -615,12 +596,7 @@ bool IsValidFileName(LPTSTR pszFileName)
 	TCHAR	TEMP[128];
 	TCHAR	msgBoxTxt[128];
 
-	if (NLGetText((HINSTANCE)g_hModule, nppData._nppHandle, _T("PossibleChars"), TEMP, 128)) {
-		_stprintf(msgBoxTxt, TEMP, _T("\n       \\ / : * ? \" < >"));
-		::MessageBox(NULL, msgBoxTxt, _T("Error"), MB_OK);
-	} else {
-		::MessageBox(NULL, _T("Filename does not contain any of this characters:\n       \\ / : * ? \" < >"), _T("Error"), MB_OK);
-	}
+	::MessageBox(NULL, _T("Filename does not contain any of this characters:\n       \\ / : * ? \" < >"), _T("Error"), MB_OK);
 	return false;
 }
 

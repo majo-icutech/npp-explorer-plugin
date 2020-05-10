@@ -210,15 +210,14 @@
     <ClInclude Include="..\..\..\Common\Ccpp\Docking.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\DockingDlgInterface.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\ImageListSet.h" />
+    <ClInclude Include="..\..\..\Common\Ccpp\menuCmdID.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\Notepad_plus_msgs.h" />
-    <ClInclude Include="..\..\..\Common\Ccpp\Notepad_plus_rc.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\PluginInterface.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\Scintilla.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\StaticDialog.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\SysMsg.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\ToolBar.h" />
     <ClInclude Include="..\..\..\Common\Ccpp\Window.h" />
-    <ClInclude Include="..\..\..\NativeLang\src\NativeLang_def.h" />
     <ClInclude Include="..\..\src\Explorer.h" />
     <ClInclude Include="..\..\src\ExplorerDialog.h" />
     <ClInclude Include="..\..\src\ExplorerResource.h" />

@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "stdafx.h"
 #include "FileList.h"
 #include "resource.h"
-#include "NativeLang_def.h"
 #include <windows.h>
 
 

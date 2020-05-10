@@ -51,9 +51,6 @@ INT_PTR CALLBACK HelpDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam
 		{
 			setVersionString();
 
-			/* change language */
-			NLChangeDialog(_hInst, _nppData._nppHandle, _hSelf, _T("Help"));
-
 			return TRUE;
 		}
 		case WM_COMMAND : 

@@ -8,9 +8,6 @@
     <Filter Include="Header Files\Common">
       <UniqueIdentifier>{7a45554f-9982-4607-9073-449c5f1191fd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\NativeLang">
-      <UniqueIdentifier>{ea0cb042-3dcd-4cb9-8e78-97522ffcb193}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\NppExec">
       <UniqueIdentifier>{0be1a273-d9bb-4310-930f-abf973209e01}</UniqueIdentifier>
     </Filter>
@@ -151,9 +148,6 @@
     <ClInclude Include="..\..\..\Common\Ccpp\Notepad_plus_msgs.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Common\Ccpp\Notepad_plus_rc.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Common\Ccpp\PluginInterface.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
@@ -172,14 +166,14 @@
     <ClInclude Include="..\..\..\Common\Ccpp\Window.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\NativeLang\src\NativeLang_def.h">
-      <Filter>Header Files\NativeLang</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\MISC\nppexec_msgs.h">
       <Filter>Header Files\NppExec</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\stdafx.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Common\Ccpp\menuCmdID.h">
+      <Filter>Header Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

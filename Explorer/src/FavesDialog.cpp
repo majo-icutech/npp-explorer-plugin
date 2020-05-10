@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "NewDlg.h"
 #include "Scintilla.h"
 #include "ToolTip.h"
+#include "menuCmdID.h"
 #include "resource.h"
 #include <dbt.h>
 #include <algorithm>
@@ -69,13 +70,6 @@ static LPTSTR szToolTip[23] = {
 	_T("Edit Link...")
 };
 
-void FavesDialog::GetNameStrFromCmd(UINT resID, LPTSTR tip, UINT count)
-{
-	if (NLGetText(_hInst, _nppData._nppHandle, szToolTip[resID - IDM_EX_LINK_NEW_FILE], tip, count) == 0) {
-		_tcscpy(tip, szToolTip[resID - IDM_EX_LINK_NEW_FILE]);
-	}
-}
-
 FavesDialog::FavesDialog(void) : DockingDlgInterface(IDD_EXPLORER_DLG)
 {
 	_hFont					= NULL;
@@ -113,9 +107,7 @@ void FavesDialog::doDialog(bool willBeShown)
 
 		// define the default docking behaviour
 		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ICONTAB;
-		if (!NLGetText(_hInst, _nppData._nppHandle, _T("Favorites"), _data.pszName, MAX_PATH)) {
-			_tcscpy(_data.pszName, _T("Favorites"));
-		}
+		_data.pszName		= _T("Favorites");
 		_data.hIconTab		= (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_HEART), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
 		_data.pszModuleName	= getPluginFileName();
 		_data.dlgID			= DOCKABLE_FAVORTIES_INDEX;
@@ -364,22 +356,6 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 				}
 				break;
 			}
-			else if (nmhdr->code == TTN_GETDISPINFO)
-			{
-				LPTOOLTIPTEXT lpttt; 
-
-				lpttt = (LPTOOLTIPTEXT)nmhdr; 
-				lpttt->hinst = _hInst; 
-
-				// Specify the resource identifier of the descriptive 
-				// text for the given button.
-				int idButton = int(lpttt->hdr.idFrom);
-
-				TCHAR	tip[MAX_PATH];
-				GetNameStrFromCmd(idButton, tip, sizeof(tip));
-				lstrcpy(lpttt->lpszText, tip);
-				return TRUE;
-			}
 
 			DockingDlgInterface::run_dlgProc(Message, wParam, lParam);
 
@@ -549,9 +525,6 @@ void FavesDialog::tb_cmd(UINT message)
 
 void FavesDialog::InitialDialog(void)
 {
-	/* change language */
-	NLChangeDialog(_hInst, _nppData._nppHandle, _hSelf, _T("Favorites"));
-
 	/* get font for drawing */
 	_hFont		= (HFONT)::SendMessage(_hSelf, WM_GETFONT, 0, 0);
 
@@ -743,11 +716,7 @@ void FavesDialog::PasteItem(HTREEITEM hItem)
 		TCHAR	TEMP[128];
 		TCHAR	msgBoxTxt[128];
 
-		if (NLGetText(_hInst, _hParent, _T("OnlyPasteInto"), TEMP, 128)) {
-			_stprintf(msgBoxTxt, TEMP, cFavesItemNames[pElemCC->uParam & FAVES_PARAM]);
-		} else {
-			_stprintf(msgBoxTxt, _T("Could only be paste into %s"), cFavesItemNames[pElemCC->uParam & FAVES_PARAM]);
-		}
+		_stprintf(msgBoxTxt, _T("Could only be paste into %s"), cFavesItemNames[pElemCC->uParam & FAVES_PARAM]);
 		::MessageBox(_hParent, msgBoxTxt, _T("Error"), MB_OK);
 	}
 }
@@ -790,9 +759,7 @@ void FavesDialog::AddToFavorties(BOOL isFolder, LPTSTR szLink)
 	_tcscpy(pszLink, szLink);
 
 	/* create description */
-	if (!NLGetText(_hInst, _nppData._nppHandle, _T("New element in"), pszComm, MAX_PATH)) {
-		_tcscpy(pszComm, _T("New element in %s"));
-	}
+	_tcscpy(pszComm, _T("New element in %s"));
 	_stprintf(pszDesc, pszComm, cFavesItemNames[root]);
 
 	/* init properties dialog */
@@ -873,13 +840,9 @@ void FavesDialog::AddSaveSession(HTREEITEM hItem, BOOL bSave)
 	pszLink[0] = '\0';
 
 	if (bSave == TRUE) {
-		if (!NLGetText(_hInst, _nppData._nppHandle, _T("Save current Session"), pszDesc, MAX_PATH)) {
-			_tcscpy(pszDesc, _T("Save current Session"));
-		}
+		_tcscpy(pszDesc, _T("Save current Session"));
 	} else {
-		if (!NLGetText(_hInst, _nppData._nppHandle, _T("Add existing Session"), pszDesc, MAX_PATH)) {
-			_tcscpy(pszDesc, _T("Add existing Session"));
-		}
+		_tcscpy(pszDesc, _T("Add existing Session"));
 	}
 
 	/* if hItem is empty, extended dialog is necessary */
@@ -1007,9 +970,8 @@ void FavesDialog::NewItem(HTREEITEM hItem)
 	pszLink[0] = '\0';
 
 	/* set description text */
-	if (!NLGetText(_hInst, _nppData._nppHandle, _T("New element in"), pszComm, MAX_PATH)) {
-		_tcscpy(pszComm, _T("New element in %s"));
-	}
+	_tcscpy(pszComm, _T("New element in %s"));
+
 	_stprintf(pszDesc, pszComm, cFavesItemNames[root]);
 
 	/* init properties dialog */
@@ -1081,12 +1043,8 @@ void FavesDialog::EditItem(HTREEITEM hItem)
 			/* get data of current selected element */
 			_tcscpy(pszName, pElem->pszName);
 			/* rename comment */
-			if (NLGetText(_hInst, _nppData._nppHandle, _T("Properties"), pszDesc, MAX_PATH) == 0) {
-				_tcscpy(pszDesc, _T("Properties"));
-			}
-			if (NLGetText(_hInst, _nppData._nppHandle, _T("Favorites"), pszComm, MAX_PATH) == 0) {
-				_tcscpy(pszComm, _T("Favorites"));
-			}
+			_tcscpy(pszDesc, _T("Properties"));
+			_tcscpy(pszComm, _T("Favorites"));
 
 			/* init new dialog */
 			NewDlg		dlgNew;
@@ -1120,9 +1078,7 @@ void FavesDialog::EditItem(HTREEITEM hItem)
 			/* get data of current selected element */
 			_tcscpy(pszName, pElem->pszName);
 			_tcscpy(pszLink, pElem->pszLink);
-			if (NLGetText(_hInst, _nppData._nppHandle, _T("Properties"), pszDesc, MAX_PATH) == 0) {
-				_tcscpy(pszDesc, _T("Properties"));
-			}
+			_tcscpy(pszDesc, _T("Properties"));
 
 			PropDlg		dlgProp;
 			dlgProp.init(_hInst, _hParent);
@@ -1251,9 +1207,6 @@ void FavesDialog::OpenContext(HTREEITEM hItem, POINT pt)
 				::AppendMenu(hMenu, MF_STRING, FM_PASTE, _T("Paste"));
 			}
 
-			/* change language */
-			NLChangeMenu(_hInst, _nppData._nppHandle, hMenu, _T("FavMenu"), MF_BYCOMMAND);
-			
 			/* track menu */
 			switch (::TrackPopupMenu(hMenu, TPM_RETURNCMD, pt.x, pt.y, 0, _hParent, NULL))
 			{
@@ -1281,9 +1234,7 @@ void FavesDialog::OpenContext(HTREEITEM hItem, POINT pt)
 
 					pszName[0] = '\0';
 
-					if (!NLGetText(_hInst, _nppData._nppHandle, _T("New group in"), pszComm, MAX_PATH)) {
-						_tcscpy(pszComm, _T("New group in %s"));
-					}
+					_tcscpy(pszComm, _T("New group in %s"));
 					_stprintf(pszDesc, pszComm, cFavesItemNames[root]);
 
 					/* init new dialog */
@@ -1385,9 +1336,6 @@ void FavesDialog::OpenContext(HTREEITEM hItem, POINT pt)
 			::AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
 			::AppendMenu(hMenu, MF_STRING, FM_PROPERTIES, _T("Properties..."));
 
-			/* change language */
-			NLChangeMenu(_hInst, _nppData._nppHandle, hMenu, _T("FavMenu"), MF_BYCOMMAND);
-
 			/* track menu */
 			switch (::TrackPopupMenu(hMenu, TPM_RETURNCMD, pt.x, pt.y, 0, _hParent, NULL))
 			{
@@ -1399,7 +1347,7 @@ void FavesDialog::OpenContext(HTREEITEM hItem, POINT pt)
 				case FM_OPENOTHERVIEW:
 				{
 					::SendMessage(_hParent, NPPM_DOOPEN, 0, (LPARAM)pElem->pszLink);
-					::SendMessage(_hParent, WM_COMMAND, IDM_VIEW_GOTO_ANOTHER_VIEW, 0);
+					::SendMessage(_hParent, NPPM_MENUCOMMAND, 0, IDM_VIEW_GOTO_ANOTHER_VIEW);
 					break;
 				}
 				case FM_OPENNEWINSTANCE:
@@ -1473,8 +1421,7 @@ void FavesDialog::OpenContext(HTREEITEM hItem, POINT pt)
 		}
 		else
 		{
-			if (NLMessageBox(_hInst, _hParent, _T("MsgBox NotInList"), MB_OK) == FALSE)
-				::MessageBox(_hParent, _T("Element not found in List!"), _T("Error"), MB_OK);
+			::MessageBox(_hParent, _T("Element not found in List!"), _T("Error"), MB_OK);
 		}
 	}
 }
@@ -1660,8 +1607,7 @@ BOOL FavesDialog::DoesNameNotExist(HTREEITEM hParentItem, HTREEITEM hCurrItem, L
 
 			if (_tcscmp(pszName, TEMP) == 0)
 			{
-				if (NLMessageBox(_hInst, _hParent, _T("MsgBox ExistsInNode"), MB_OK) == FALSE)
-					::MessageBox(_hParent, _T("Name still exists in node!"), _T("Error"), MB_OK);
+				::MessageBox(_hParent, _T("Name still exists in node!"), _T("Error"), MB_OK);
 				bRet = FALSE;
 				break;
 			}
@@ -1684,8 +1630,7 @@ BOOL FavesDialog::DoesLinkExist(LPTSTR pszLink, int root)
 			/* test if path exists */
 			bRet = ::PathFileExists(pszLink);
 			if (bRet == FALSE) {
-				if (NLMessageBox(_hInst, _hParent, _T("MsgBox FolderMiss"), MB_OK) == FALSE)
-					::MessageBox(_hParent, _T("Folder doesn't exist!"), _T("Error"), MB_OK);
+				::MessageBox(_hParent, _T("Folder doesn't exist!"), _T("Error"), MB_OK);
 			}
 			break;
 		}
@@ -1695,8 +1640,7 @@ BOOL FavesDialog::DoesLinkExist(LPTSTR pszLink, int root)
 			/* test if path exists */
 			bRet = ::PathFileExists(pszLink);
 			if (bRet == FALSE) {
-				if (NLMessageBox(_hInst, _hParent, _T("MsgBox FileMiss"), MB_OK) == FALSE)
-					::MessageBox(_hParent, _T("File doesn't exist!"), _T("Error"), MB_OK);
+				::MessageBox(_hParent, _T("File doesn't exist!"), _T("Error"), MB_OK);
 			}
 			break;
 		}
@@ -1706,8 +1650,7 @@ BOOL FavesDialog::DoesLinkExist(LPTSTR pszLink, int root)
 			break;
 		}
 		default:
-			if (NLMessageBox(_hInst, _hParent, _T("MsgBox FavesElemMiss"), MB_OK) == FALSE)
-				::MessageBox(_hParent, _T("Faves element doesn't exist!"), _T("Error"), MB_OK);
+			::MessageBox(_hParent, _T("Faves element doesn't exist!"), _T("Error"), MB_OK);
 			break;
 	}
 

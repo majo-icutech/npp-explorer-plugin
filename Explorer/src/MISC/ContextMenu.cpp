@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "stdafx.h"
 #include "FavesDialog.h"
 #include "ContextMenu.h"
+#include "menuCmdID.h"
 #include "nppexec_msgs.h"
 
 
@@ -306,11 +307,7 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 				}
 			}
 
-			TCHAR	szMenuName[MAX_PATH];
-			if (!NLGetText(_hInst, _hWndNpp, _T("Standard Menu"), szMenuName, MAX_PATH)) {
-				_tcscpy(szMenuName, _T("Standard Menu"));
-			}
-			::InsertMenu(hMainMenu, 4, MF_BYPOSITION | MF_STRING | MF_POPUP, (UINT_PTR)_hMenu, szMenuName);
+			::InsertMenu(hMainMenu, 4, MF_BYPOSITION | MF_STRING | MF_POPUP, (UINT_PTR)_hMenu, _T("Standard Menu"));
 			::InsertMenu(hMainMenu, (dwExecVer >= 0x02F5 ? 7 : 6), MF_BYPOSITION | MF_SEPARATOR, 0, 0);
 		}
 		else
@@ -336,9 +333,6 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 	}
 
 	/*****************************************************************************************************/
-
-	/* change language */
-	NLChangeMenu(_hInst, _hWndNpp, hMainMenu, _T("ContextMenu"), MF_BYCOMMAND);
 
 	UINT idCommand = ::TrackPopupMenu(hMainMenu, TPM_RETURNCMD, pt.x, pt.y, 0, hWndParent, NULL);
 
@@ -706,9 +700,7 @@ void ContextMenu::Rename(void)
 	(_tcsrchr(newFirstElement, '\\')[1]) = 0;
 
 	/* rename comment */
-	if (NLGetText(_hInst, _hWndNpp, _T("Rename"), szComment, MAX_PATH) == 0) {
-		_tcscpy(szComment, _T("Rename"));
-	}
+	_tcscpy(szComment, _T("Rename"));
 
 	dlg.init((HINSTANCE)g_hModule, _hWndNpp);
 	if (dlg.doDialog(szNewName, szComment) == TRUE)
@@ -728,10 +720,7 @@ void ContextMenu::newFile(void)
 
 	szFileName[0] = '\0';
 
-	/* rename comment */
-	if (NLGetText(_hInst, _hWndNpp, _T("New file"), szComment, MAX_PATH) == 0) {
-		_tcscpy(szComment, _T("New file"));
-	}
+	_tcscpy(szComment, _T("New file"));
 
 	dlg.init((HINSTANCE)g_hModule, _hWndNpp);
 	while (bLeave == FALSE)
@@ -763,10 +752,7 @@ void ContextMenu::newFolder(void)
 
 	szFolderName[0] = '\0';
 
-	/* rename comment */
-	if (NLGetText(_hInst, _hWndNpp, _T("New folder"), szComment, MAX_PATH) == 0) {
-		_tcscpy(szComment, _T("New folder"));
-	}
+	_tcscpy(szComment, _T("New folder"));
 
 	dlg.init((HINSTANCE)g_hModule, _hWndNpp);
 	while (bLeave == FALSE)
@@ -778,8 +764,7 @@ void ContextMenu::newFolder(void)
 			{
 				string		newFolder = _strFirstElement + szFolderName;
 				if (::CreateDirectory(newFolder.c_str(), NULL) == FALSE) {
-					if (NLMessageBox(_hInst, _hWndNpp, _T("MsgBox FolderCreateError"), MB_OK) == FALSE)
-						::MessageBox(_hWndNpp, _T("Folder couldn't be created."), _T("Error"), MB_OK);
+					::MessageBox(_hWndNpp, _T("Folder couldn't be created."), _T("Error"), MB_OK);
 				}
 				bLeave = TRUE;
 			}
@@ -809,7 +794,7 @@ void ContextMenu::openFileInOtherView(void)
 		::SendMessage(_hWndNpp, NPPM_DOOPEN, 0, (LPARAM)_strArray[i].c_str());
 		if (i == 0)
 		{
-			::SendMessage(_hWndNpp, WM_COMMAND, IDM_VIEW_GOTO_ANOTHER_VIEW, 0);
+			::SendMessage(_hWndNpp, NPPM_MENUCOMMAND, 0, IDM_VIEW_GOTO_ANOTHER_VIEW);
 		}
 	}
 }
@@ -861,8 +846,7 @@ void ContextMenu::addToFaves(bool isFolder)
 	/* test if only one file is selected */
 	if (_strArray.size() > 1)
 	{
-		if (NLMessageBox(_hInst, _hWndNpp, _T("MsgBox OneFileToFaves"), MB_OK) == FALSE)
-			::MessageBox(_hWndNpp, _T("Only one file could be added!"), _T("Error"), MB_OK);
+		::MessageBox(_hWndNpp, _T("Only one file could be added!"), _T("Error"), MB_OK);
 	}
 	else
 	{
@@ -1002,8 +986,7 @@ void ContextMenu::startNppExec(HMODULE hInst, UINT cmdID)
 
 					if (npep.dwResult != NPE_NPPEXEC_OK)
 					{
-						if (NLMessageBox(_hInst, _hWndNpp, _T("MsgBox NppExecBusy"), MB_OK) == FALSE)
-							::MessageBox(_hWndNpp, _T("NppExec currently in use!"), _T("Error"), MB_OK);
+						::MessageBox(_hWndNpp, _T("NppExec currently in use!"), _T("Error"), MB_OK);
 					}
 					
 					delete [] pszArg;

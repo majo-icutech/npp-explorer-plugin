@@ -154,17 +154,6 @@ static LPTSTR szToolTip[23] = {
 	_T("Refresh")
 };
 
-
-void ExplorerDialog::GetNameStrFromCmd(UINT resID, LPTSTR tip, UINT count)
-{
-	if (NLGetText(_hInst, _nppData._nppHandle, szToolTip[resID - IDM_EX_PREV], tip, count) == 0) {
-		_tcscpy(tip, szToolTip[resID - IDM_EX_PREV]);
-	}
-}
-
-
-
-
 ExplorerDialog::ExplorerDialog(void) : DockingDlgInterface(IDD_EXPLORER_DLG)
 {
 	_hDefaultTreeProc		= NULL;
@@ -210,9 +199,7 @@ void ExplorerDialog::doDialog(bool willBeShown)
 
 		// define the default docking behaviour
 		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ADDINFO | DWS_ICONTAB;
-		if (!NLGetText(_hInst, _nppData._nppHandle, _T("Explorer"), _data.pszName, MAX_PATH)) {
-			_tcscpy(_data.pszName, _T("Explorer"));
-		}
+		_data.pszName		= _T("Explorer");
 		_data.pszAddInfo	= _pExProp->szCurrentPath;
 		_data.hIconTab		= (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_EXPLORE), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
 		_data.pszModuleName	= getPluginFileName();
@@ -377,22 +364,6 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 					return TRUE;
 				}
 				break;
-			}
-			else if (nmhdr->code == TTN_GETDISPINFO)
-			{
-				LPTOOLTIPTEXT lpttt; 
-
-				lpttt = (LPTOOLTIPTEXT)nmhdr; 
-				lpttt->hinst = _hInst; 
-
-				// Specify the resource identifier of the descriptive 
-				// text for the given button.
-				int resId = int(lpttt->hdr.idFrom);
-
-				TCHAR	tip[MAX_PATH];
-				GetNameStrFromCmd(resId, tip, sizeof(tip));
-				lstrcpy(lpttt->lpszText, tip);
-				return TRUE;
 			}
 
 			DockingDlgInterface::run_dlgProc(Message, wParam, lParam);
@@ -1078,9 +1049,7 @@ void ExplorerDialog::tb_cmd(UINT message)
 			szFileName[0] = '\0';
 
 			/* rename comment */
-			if (NLGetText(_hInst, _nppData._nppHandle, _T("New file"), szComment, MAX_PATH) == 0) {
-				_tcscpy(szComment, _T("New file"));
-			}
+			_tcscpy(szComment, _T("New file"));
 
 			dlg.init(_hInst, _hParent);
 			while (bLeave == FALSE)
@@ -1115,10 +1084,7 @@ void ExplorerDialog::tb_cmd(UINT message)
 
 			szFolderName[0] = '\0';
 
-			/* rename comment */
-			if (NLGetText(_hInst, _nppData._nppHandle, _T("New folder"), szComment, MAX_PATH) == 0) {
-				_tcscpy(szComment, _T("New folder"));
-			}
+			_tcscpy(szComment, _T("New folder"));
 
 			dlg.init(_hInst, _hParent);
 			while (bLeave == FALSE)
@@ -1134,8 +1100,7 @@ void ExplorerDialog::tb_cmd(UINT message)
 						_tcscat(pszNewFolder, szFolderName);
 						
 						if (::CreateDirectory(pszNewFolder, NULL) == FALSE) {
-							if (NLMessageBox(_hInst, _hParent, _T("MsgBox FolderCreateError"), MB_OK) == FALSE)
-								::MessageBox(_hParent, _T("Folder couldn't be created."), _T("Error"), MB_OK);
+							::MessageBox(_hParent, _T("Folder couldn't be created."), _T("Error"), MB_OK);
 						}
 						bLeave = TRUE;
 					}
@@ -1406,10 +1371,6 @@ void ExplorerDialog::InitialDialog(void)
 	fmtetc.lindex		= -1; 
 	fmtetc.tymed		= TYMED_HGLOBAL;
 	AddSuportedFormat(_hTreeCtrl, fmtetc); 
-
-	/* change language */
-	NLChangeDialog(_hInst, _nppData._nppHandle, _hSelf, _T("Explorer"));
-	NLChangeHeader(_hInst, _nppData._nppHandle, _hHeader, _T("FileList"));
 }
 
 BOOL ExplorerDialog::SelectItem(LPCTSTR path)
@@ -1527,10 +1488,7 @@ void ExplorerDialog::gotoPath(void)
 
 	szFolderName[0] = '\0';
 
-	/* rename comment */
-	if (NLGetText(_hInst, _nppData._nppHandle, _T("Go to Path"), szComment, MAX_PATH) == 0) {
-		_tcscpy(szComment, _T("Go to Path"));
-	}
+	_tcscpy(szComment, _T("Go to Path"));
 
 	/* copy current path to show current position */
 	_tcscpy(szFolderName, _pExProp->szCurrentPath);
@@ -1550,9 +1508,7 @@ void ExplorerDialog::gotoPath(void)
 			}
 			else
 			{
-				INT msgRet = NLMessageBox(_hInst, _hParent, _T("MsgBox FolderDoesNotExist"), MB_RETRYCANCEL);
-				if (msgRet == FALSE)
-					msgRet = ::MessageBox(_hParent, _T("Path doesn't exist."), _T("Error"), MB_RETRYCANCEL);
+				INT msgRet = ::MessageBox(_hParent, _T("Path doesn't exist."), _T("Error"), MB_RETRYCANCEL);
 
 				if (msgRet == IDCANCEL)
 					bLeave = TRUE;

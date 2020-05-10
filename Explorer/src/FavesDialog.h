@@ -80,7 +80,6 @@ protected:
 
 	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
 
-	void GetNameStrFromCmd(UINT idButton, LPTSTR tip, UINT count);
 	void tb_cmd(UINT message);
 
 	void InitialDialog(void);
