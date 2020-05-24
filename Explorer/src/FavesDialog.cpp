@@ -1750,7 +1750,7 @@ void FavesDialog::SortElementsRecursive(vector<tItemElement> & vElement, int d, 
 {
 	int		i	= 0;
 	int		j	= 0;
-	wstring	str = _T("");
+	LPTSTR	str = _T("");
 
 	/* return on empty list */
 	if (d > h || d < 0)
@@ -1762,9 +1762,9 @@ void FavesDialog::SortElementsRecursive(vector<tItemElement> & vElement, int d, 
 	str = vElement[((int) ((d+h) / 2))].pszName;
 	do
 	{
-		/* sort in alphabeticaly order */
-		while (vElement[j].pszName < str) j++;
-		while (vElement[i].pszName > str) i--;
+		/* sort in alphabeticaly order */		
+		while (_tcsicmp(vElement[j].pszName, str) < 0) j++;
+		while (_tcsicmp(vElement[i].pszName, str) > 0) i--;
 
 		if ( i >= j )
 		{
