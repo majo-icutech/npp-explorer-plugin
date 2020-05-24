@@ -116,7 +116,7 @@ vector<tDrvMap>		gvDrvMap;
 HIMAGELIST			ghImgList			= NULL;
 
 /* current open docs */
-vector<string>		g_vStrCurrentFiles;
+vector<wstring>		g_vStrCurrentFiles;
 
 
 
@@ -300,14 +300,10 @@ extern "C" __declspec(dllexport) LRESULT messageProc(UINT Message, WPARAM wParam
    return TRUE;
 }
 
-
-#ifdef UNICODE
 extern "C" __declspec(dllexport) BOOL isUnicode()
 {
 	return TRUE;
 }
-#endif
-
 
 /***
  *	ScintillaMsg()
@@ -332,7 +328,7 @@ void loadSettings(void)
 	/* Test if config path exist, if not create */
 	if (::PathFileExists(configPath) == FALSE)
 	{
-		vector<string>    vPaths;
+		vector<wstring>    vPaths;
 		do {
 			vPaths.push_back(configPath);
 			::PathRemoveFileSpec(configPath);
@@ -351,17 +347,13 @@ void loadSettings(void)
 	if (::PathFileExists(iniFilePath) == FALSE)
 	{
 		HANDLE	hFile			= NULL;
-#ifdef UNICODE
 		BYTE	szBOM[]			= {0xFF, 0xFE};
 		DWORD	dwByteWritten	= 0;
-#endif
 			
 		if (hFile != INVALID_HANDLE_VALUE)
 		{
 			hFile = ::CreateFile(iniFilePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-#ifdef UNICODE
 			::WriteFile(hFile, szBOM, sizeof(szBOM), &dwByteWritten, NULL);
-#endif
 			::CloseHandle(hFile);
 		}
 	}
@@ -394,20 +386,12 @@ void loadSettings(void)
 		_stprintf(number, _T("%d"), i);
 		if (::GetPrivateProfileString(FilterHistory, number, _T(""), pszTemp, MAX_PATH, iniFilePath) != 0)
 		{
-#ifdef UNICODE
 			exProp.vStrFilterHistory.push_back(wstring(pszTemp));
-#else
-			exProp.vStrFilterHistory.push_back(string(pszTemp));
-#endif
 		}
 	}
 	::GetPrivateProfileString(Explorer, LastFilter, _T("*.*"), pszTemp, MAX_PATH, iniFilePath);
 
-#ifdef UNICODE
 	exProp.strLastFilter = wstring(pszTemp);
-#else
-	exProp.strLastFilter = string(pszTemp);
-#endif
 
 	if (::PathFileExists(exProp.szCurrentPath) == FALSE)
 		_tcscpy(exProp.szCurrentPath, _T("C:\\"));
@@ -894,11 +878,7 @@ HRESULT ResolveShortCut(LPCTSTR lpszShortcutPath, LPTSTR lpszFilePath, int maxBu
         CComQIPtr<IPersistFile> ipPersistFile(ipShellLink);
 
         // IPersistFile is using LPCOLESTR, so make sure that the string is Unicode
-#if !defined UNICODE
-        MultiByteToWideChar(CP_ACP, 0, lpszShortcutPath, -1, wszTemp, MAX_PATH);
-#else
         wcsncpy(wszTemp, lpszShortcutPath, MAX_PATH);
-#endif
 
         // Open the shortcut file and initialize it from its contents
         hRes = ipPersistFile->Load(wszTemp, STGM_READ); 
@@ -1013,7 +993,7 @@ BOOL IsFileOpen(LPCTSTR pCurrFile)
 /**************************************************************************
  *	compare arguments and convert
  */
-BOOL ConvertCall(LPTSTR pszExplArg, LPTSTR pszName, LPTSTR *p_pszNppArg, vector<string> vFileList)
+BOOL ConvertCall(LPTSTR pszExplArg, LPTSTR pszName, LPTSTR *p_pszNppArg, vector<wstring> vFileList)
 {
 	TCHAR			szElement[MAX_PATH];
 	LPTSTR			pszPtr		= NULL;

@@ -116,7 +116,6 @@ protected:
 	void UpdateFolders(void);
 	void UpdatePath(void);
 
-	void SelectItem(POINT pt);
 	BOOL SelectItem(LPCTSTR path);
 
 	void onDelete(bool immediate = false);

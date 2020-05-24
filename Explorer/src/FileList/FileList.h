@@ -32,13 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <shlobj.h>
 #pragma warning(pop)
 
-#ifdef _UNICODE
-#define string	wstring
-#endif
-
 typedef struct {
-	string			strPath;
-	vector<string>	vStrItems;
+	wstring			strPath;
+	vector<wstring>	vStrItems;
 } tStaInfo;
 
 
@@ -55,12 +51,12 @@ typedef struct {
 	INT			iIcon;
 	INT			iOverlay;
 	BOOL		bHidden;
-	string		strName;
-	string		strExt;
-	string		strSize;
-	string		strDate;
+	wstring		strName;
+	wstring		strExt;
+	wstring		strSize;
+	wstring		strDate;
 	/* not visible, only for sorting */
-	string		strNameExt;
+	wstring		strNameExt;
 	__int64		i64Size;
 	__int64		i64Date;
 	/* not visible, remember state */
@@ -95,13 +91,13 @@ public:
 	void ToggleStackRec(void);					// enables/disable trace of viewed directories
 	void ResetDirStack(void);					// resets the stack
 	void SetToolBarInfo(ToolBar *ToolBar, UINT idRedo, UINT idUndo);	// set dependency to a toolbar element
-	bool GetPrevDir(LPTSTR pszPath, vector<string> & vStrItems);			// get previous directory
-	bool GetNextDir(LPTSTR pszPath, vector<string> & vStrItems);			// get next directory
+	bool GetPrevDir(LPTSTR pszPath, vector<wstring> & vStrItems);			// get previous directory
+	bool GetNextDir(LPTSTR pszPath, vector<wstring> & vStrItems);			// get next directory
 	INT  GetPrevDirs(LPTSTR *pszPathes);		// get previous directorys
 	INT  GetNextDirs(LPTSTR *pszPathes);		// get next directorys
-	void OffsetItr(INT offsetItr, vector<string> & vStrItems);			// get offset directory
+	void OffsetItr(INT offsetItr, vector<wstring> & vStrItems);			// get offset directory
 	void UpdateSelItems(void);
-	void SetItems(vector<string> vStrItems);
+	void SetItems(vector<wstring> vStrItems);
 
 	void UpdateOverlayIcon(void);
 
@@ -167,12 +163,12 @@ protected:
 		ListView_SetSelectionMark(_hSelf, item);
 	};
 
-	void GetSize(__int64 size, string & str);
-	void GetDate(FILETIME ftLastWriteTime, string & str);
+	void GetSize(__int64 size, wstring& str);
+	void GetDate(FILETIME ftLastWriteTime, wstring& str);
 
 	void GetFilterLists(LPTSTR pszFilter, LPTSTR pszExFilter);
 	BOOL DoFilter(LPCTSTR pszFileName, LPTSTR pszFilter, LPTSTR pszExFilter);
-	INT  WildCmp(LPCTSTR string, LPCTSTR wild);
+	INT  WildCmp(LPCTSTR wstring, LPCTSTR wild);
 
 private:	/* for thread */
 

@@ -742,7 +742,7 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 						/* get correct font */
 						HFONT	hDefFont	= NULL;
 						if (iItem >= _uMaxFolders) {
-							string	strFilePath	= _pExProp->szCurrentPath + _vFileList[iItem].strNameExt;
+							wstring	strFilePath	= _pExProp->szCurrentPath + _vFileList[iItem].strNameExt;
 							if (IsFileOpen(strFilePath.c_str()) == TRUE) {
 								hDefFont = (HFONT)::SelectObject(hMemDc, _hFontUnder);
 							}
@@ -1387,7 +1387,7 @@ void FileList::SetOrder(void)
  */ 
 void FileList::onRMouseBtn(void)
 {
-	vector<string>	data;
+	vector<wstring>	data;
 	BOOL			isParent = FALSE;
 
 	/* create data */
@@ -1608,7 +1608,7 @@ void FileList::QuickSortRecursiveCol(INT d, INT h, INT column, BOOL bAscending)
 {
 	INT		i		= 0;
 	INT		j		= 0;
-	string	str		= _T("");
+	wstring	str		= _T("");
 	__int64	i64Data	= 0;
 
 	/* return on empty list */
@@ -1728,7 +1728,7 @@ void FileList::QuickSortRecursiveColEx(INT d, INT h, INT column, BOOL bAscending
 	{
 		case 1:
 		{
-			string		str = _T("");
+			wstring		str = _T("");
 
 			for (INT i = d; i < h ;)
 			{
@@ -1778,7 +1778,7 @@ void FileList::QuickSortRecursiveColEx(INT d, INT h, INT column, BOOL bAscending
 	}
 }
 
-void FileList::GetSize(__int64 size, string & str)
+void FileList::GetSize(__int64 size, wstring & str)
 {
 	TCHAR	TEMP[MAX_PATH];
 
@@ -1893,7 +1893,7 @@ void FileList::GetSize(__int64 size, string & str)
 	}
 }
 
-void FileList::GetDate(FILETIME ftLastWriteTime, string & str)
+void FileList::GetDate(FILETIME ftLastWriteTime, wstring & str)
 {
 	FILETIME		ftLocalTime;
 	SYSTEMTIME		sysTime;
@@ -2061,7 +2061,7 @@ void FileList::PushDir(LPCTSTR pszPath)
 	UpdateToolBarElements();
 }
 
-bool FileList::GetPrevDir(LPTSTR pszPath, vector<string> & vStrItems)
+bool FileList::GetPrevDir(LPTSTR pszPath, vector<wstring> & vStrItems)
 {
 	if (_vDirStack.size() > 1)
 	{
@@ -2076,7 +2076,7 @@ bool FileList::GetPrevDir(LPTSTR pszPath, vector<string> & vStrItems)
 	return false;
 }
 
-bool FileList::GetNextDir(LPTSTR pszPath, vector<string> & vStrItems)
+bool FileList::GetNextDir(LPTSTR pszPath, vector<wstring> & vStrItems)
 {
 	if (_vDirStack.size() > 1)
 	{
@@ -2135,7 +2135,7 @@ INT FileList::GetNextDirs(LPTSTR	*pszPathes)
 	return i;
 }
 
-void FileList::OffsetItr(INT offsetItr, vector<string> & vStrItems)
+void FileList::OffsetItr(INT offsetItr, vector<wstring> & vStrItems)
 {
 	_itrPos += offsetItr;
 	vStrItems = _itrPos->vStrItems;
@@ -2164,7 +2164,7 @@ void FileList::UpdateSelItems(void)
 	}
 }
 
-void FileList::SetItems(vector<string> vStrItems)
+void FileList::SetItems(vector<wstring> vStrItems)
 {
 	UINT	selType = LVIS_SELANDFOC;
 
@@ -2233,11 +2233,7 @@ void FileList::FolderExChange(CIDropSource* pdsrc, CIDataObject* pdobj, UINT dwE
 	lpDropFileStruct->pt.x = 0;
 	lpDropFileStruct->pt.y = 0;
 	lpDropFileStruct->fNC = FALSE;
-#ifdef _UNICODE
 	lpDropFileStruct->fWide = TRUE;
-#else
-	lpDropFileStruct->fWide = FALSE;
-#endif
 
 	/* add files to payload and seperate with "\0" */
 	UINT	offset	= 0;
@@ -2347,21 +2343,12 @@ bool FileList::doPaste(LPCTSTR pszTo, LPDROPFILES hData, const DWORD & dwEffect)
 	LPVOID		pPld					= (LPBYTE)hData + headerSize;
 	LPTSTR		lpszFilesFrom			= NULL;
 
-#ifdef _UNICODE
 	if (((LPDROPFILES)hData)->fWide == TRUE) {
 		lpszFilesFrom = (LPWSTR)pPld;
 	} else {
 		lpszFilesFrom = new TCHAR[payloadSize];
 		::MultiByteToWideChar(CP_ACP, 0, (LPCSTR)pPld, payloadSize, lpszFilesFrom, payloadSize);
 	}
-#else
-	if (((LPDROPFILES)hData)->fWide == TRUE) {
-		lpszFilesFrom = new CHAR[payloadSize/2];
-		::WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)pPld, payloadSize, lpszFilesFrom, payloadSize/2, NULL, NULL);
-	} else {
-		lpszFilesFrom = (LPSTR)pPld;
-	}
-#endif
 
 	if (lpszFilesFrom != NULL)
 	{
@@ -2402,11 +2389,7 @@ bool FileList::doPaste(LPCTSTR pszTo, LPDROPFILES hData, const DWORD & dwEffect)
 			::SetTimer(_hParent, EXT_UPDATEACTIVATEPATH, 200, NULL);
 		}
 
-#ifdef _UNICODE
 		if (((LPDROPFILES)hData)->fWide == FALSE) {
-#else
-		if (((LPDROPFILES)hData)->fWide == TRUE) {
-#endif
 			delete [] lpszFilesFrom;
 		}
 	}

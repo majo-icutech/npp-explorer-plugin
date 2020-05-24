@@ -344,11 +344,7 @@ void TreeHelper::QuickSortItems(vector<tItemList>* vList, INT d, INT h)
 {
 	INT		i		= 0;
 	INT		j		= 0;
-#ifdef _UNICODE
 	wstring	str		= _T("");
-#else
-	string	str		= "";
-#endif
 
 	/* return on empty list */
 	if (d > h || d < 0)

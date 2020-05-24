@@ -452,10 +452,10 @@ void ContextMenu::InvokeCommand (LPCONTEXTMENU pContextMenu, UINT idCommand)
 
 
 
-void ContextMenu::SetObjects(string strObject)
+void ContextMenu::SetObjects(wstring strObject)
 {
 	// only one object is passed
-	vector<string>	strArray;
+	vector<wstring>	strArray;
 	strArray.push_back(strObject);	// create a CStringArray with one element
 	
 	SetObjects (strArray);			// and pass it to SetObjects (vector<string> strArray)
@@ -463,7 +463,7 @@ void ContextMenu::SetObjects(string strObject)
 }
 
 
-void ContextMenu::SetObjects(vector<string> strArray)
+void ContextMenu::SetObjects(vector<wstring> strArray)
 {
 	// store also the string for later menu use
 	_strFirstElement = strArray[0];
@@ -485,15 +485,7 @@ void ContextMenu::SetObjects(vector<string> strArray)
 	// that means that it's a fully qualified PIDL, which is what we need
 	LPITEMIDLIST pidl = NULL;
 
-#ifndef _UNICODE
-	OLECHAR * olePath = NULL;
-	olePath = (OLECHAR *) calloc (strArray[0].size() + 1, sizeof (OLECHAR));
-	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, strArray[0].c_str(), -1, olePath, strArray[0].size() + 1);	
-	psfDesktop->ParseDisplayName (NULL, 0, olePath, NULL, &pidl, NULL);
-	free (olePath);
-#else
 	psfDesktop->ParseDisplayName (NULL, 0, (LPOLESTR)strArray[0].c_str(), NULL, &pidl, NULL);
-#endif
 
 	if (pidl != NULL)
 	{
@@ -514,14 +506,7 @@ void ContextMenu::SetObjects(vector<string> strArray)
 		_nItems = strArray.size();
 		for (int i = 0; i < _nItems; i++)
 		{
-#ifndef _UNICODE
-			olePath = (OLECHAR *) calloc (strArray[i].size() + 1, sizeof (OLECHAR));
-			MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, strArray[i].c_str(), -1, olePath, strArray[i].size() + 1);	
-			psfDesktop->ParseDisplayName (NULL, 0, olePath, NULL, &pidl, NULL);
-			free (olePath);
-#else
 			psfDesktop->ParseDisplayName (NULL, 0, (LPOLESTR)strArray[i].c_str(), NULL, &pidl, NULL);
-#endif
 			_pidlArray = (LPITEMIDLIST *) realloc (_pidlArray, (i + 1) * sizeof (LPITEMIDLIST));
 			// get relative pidl via SHBindToParent
 			SHBindToParentEx (pidl, IID_IShellFolder, (void **) &psfFolder, (LPCITEMIDLIST *) &pidlItem);
@@ -730,7 +715,7 @@ void ContextMenu::newFile(void)
 			/* test if is correct */
 			if (IsValidFileName(szFileName))
 			{
-				string		newFile	= _strFirstElement + szFileName;
+				wstring		newFile	= _strFirstElement + szFileName;
 				
 				::CloseHandle(::CreateFile(newFile.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
 				::SendMessage(_hWndNpp, NPPM_DOOPEN, 0, (LPARAM)newFile.c_str());
@@ -762,7 +747,7 @@ void ContextMenu::newFolder(void)
 			/* test if is correct */
 			if (IsValidFileName(szFolderName))
 			{
-				string		newFolder = _strFirstElement + szFolderName;
+				wstring		newFolder = _strFirstElement + szFolderName;
 				if (::CreateDirectory(newFolder.c_str(), NULL) == FALSE) {
 					::MessageBox(_hWndNpp, _T("Folder couldn't be created."), _T("Error"), MB_OK);
 				}
@@ -801,7 +786,7 @@ void ContextMenu::openFileInOtherView(void)
 
 void ContextMenu::openFileInNewInstance(void)
 {
-	string	args2Exec;
+	wstring	args2Exec;
 	extern	HANDLE		g_hModule;
 	TCHAR				szNpp[MAX_PATH];
 
@@ -857,7 +842,7 @@ void ContextMenu::addToFaves(bool isFolder)
 
 void ContextMenu::addFullPathsCB(void)
 {
-	string temp;
+	wstring temp;
 	for (UINT i = 0; i < _strArray.size(); i++) {
 		if (i != 0) temp += _T("\n");
 		temp += _strArray[i];
@@ -867,7 +852,7 @@ void ContextMenu::addFullPathsCB(void)
 
 void ContextMenu::addFileNamesCB(void)
 {
-	string	temp;
+	wstring	temp;
 	for (UINT i = 0; i < _strArray.size(); i++)
 	{
 		UINT	pos		= _strArray[i].rfind(_T("\\"), _strArray[i].size()-1);
@@ -944,7 +929,6 @@ void ContextMenu::startNppExec(HMODULE hInst, UINT cmdID)
 				/* read data from file */
 				::ReadFile(hFile, pszData, dwSize, &hasRead, NULL);
 
-#ifdef UNICODE
 				TCHAR		szBOM		= 0xFEFF;
 				LPTSTR		pszData2	= NULL;
 
@@ -961,10 +945,6 @@ void ContextMenu::startNppExec(HMODULE hInst, UINT cmdID)
 					delete [] pszData;
 					return; /* ============= Leave Function ================== */
 				}
-#else
-				/* get argument string to convert */
-				pszPtr = _tcstok(pszPtr, _T("\n"));
-#endif
 
 				if (ConvertCall(pszPtr, szAppName, &pszArg, _strArray) == TRUE)
 				{
@@ -992,9 +972,7 @@ void ContextMenu::startNppExec(HMODULE hInst, UINT cmdID)
 					delete [] pszArg;
 				}
 				delete [] pszData;
-#ifdef UNICODE
 				delete [] pszData2;
-#endif
 			}
 		}
 
@@ -1015,11 +993,7 @@ bool ContextMenu::Str2CB(LPCTSTR str2cpy)
 		
 	::EmptyClipboard();
 	
-#ifdef _UNICODE
 	HGLOBAL hglbCopy = ::GlobalAlloc(GMEM_MOVEABLE, _tcslen(str2cpy) * 2 + 2);
-#else
-	HGLOBAL hglbCopy = ::GlobalAlloc(GMEM_MOVEABLE, _tcslen(str2cpy) + 1);
-#endif
 	
 	if (hglbCopy == NULL) 
 	{ 
@@ -1033,11 +1007,7 @@ bool ContextMenu::Str2CB(LPCTSTR str2cpy)
 	::GlobalUnlock(hglbCopy); 
 
 	// Place the handle on the clipboard. 
-#ifdef _UNICODE
 	::SetClipboardData(CF_UNICODETEXT, hglbCopy);
-#else
-	::SetClipboardData(CF_TEXT, hglbCopy);
-#endif
 	::CloseClipboard();
 	return true;
 }

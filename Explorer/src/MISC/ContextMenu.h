@@ -77,8 +77,8 @@ public:
 	/* get menu */
 	HMENU	GetMenu (void);
 
-	void SetObjects(string strObject);
-	void SetObjects(vector<string> strArray);
+	void SetObjects(wstring strObject);
+	void SetObjects(vector<wstring> strArray);
 	UINT ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent, POINT pt, bool normal = true);
 
 private:
@@ -121,9 +121,9 @@ private:
 	IShellFolder*			_psfFolder;
 	LPITEMIDLIST*			_pidlArray;	
 
-	string					_strFirstElement;
-	vector<string>			_strArray;
-	vector<string>			_strNppScripts;
+	wstring					_strFirstElement;
+	vector<wstring>			_strArray;
+	vector<wstring>			_strNppScripts;
 };
 
 #endif // CONTEXTMENU_DEFINE_H

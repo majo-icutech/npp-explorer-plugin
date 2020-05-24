@@ -27,10 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace std;
 
-#ifdef _UNICODE
-#define string	wstring
-#endif
-
 enum {
 	ICON_UPDATE_EVT_START,
 	ICON_UPDATE_EVT_RESP,
@@ -39,7 +35,7 @@ enum {
 };
 
 typedef struct {
-	string				strLastPath;
+	wstring				strLastPath;
 	HTREEITEM			hLastItem;
 } tTreeIconUpdate;
 
@@ -93,7 +89,7 @@ protected:
 private:
 
 	struct tItemList {
-		string	strName;
+		wstring	strName;
 		DWORD	dwAttributes;
 	};
 	void QuickSortItems(vector<tItemList>* vList, INT d, INT h);

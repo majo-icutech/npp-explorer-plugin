@@ -658,7 +658,7 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 		{
 			ContextMenu		cm;
 			POINT			pt				= {0};
-			vector<string>	files			= *((vector<string>*)lParam);
+			vector<wstring>	files			= *((vector<wstring>*)lParam);
 			HTREEITEM		hItem			= TreeView_GetSelection(_hTreeCtrl);
 			DWORD			dwpos			= ::GetMessagePos();
 			TCHAR			folderPathName[MAX_PATH];
@@ -998,7 +998,7 @@ void ExplorerDialog::tb_cmd(UINT message)
 			TCHAR			pszPath[MAX_PATH];
 			BOOL			dirValid	= TRUE;
 			BOOL			selected	= TRUE;
-			vector<string>	vStrItems;
+			vector<wstring>	vStrItems;
 
 			_FileList.ToggleStackRec();
 
@@ -1021,7 +1021,7 @@ void ExplorerDialog::tb_cmd(UINT message)
 			TCHAR			pszPath[MAX_PATH];
 			BOOL			dirValid	= TRUE;
 			BOOL			selected	= TRUE;
-			vector<string>	vStrItems;
+			vector<wstring>	vStrItems;
 
 			_FileList.ToggleStackRec();
 
@@ -1194,7 +1194,7 @@ void ExplorerDialog::tb_not(LPNMTOOLBAR lpnmtb)
 
 	/* select element */
 	if (cmd) {
-		vector<string>	vStrItems;
+		vector<wstring>	vStrItems;
 
 		SelectItem(pszPathes[cmd-1]);
 		_FileList.OffsetItr(lpnmtb->iItem == IDM_EX_PREV ? -cmd : cmd, vStrItems);
@@ -1833,11 +1833,7 @@ void ExplorerDialog::FolderExChange(CIDropSource* pdsrc, CIDataObject* pdobj, UI
 	lpDropFileStruct->pt.x = 0;
 	lpDropFileStruct->pt.y = 0;
 	lpDropFileStruct->fNC = FALSE;
-#ifdef _UNICODE
 	lpDropFileStruct->fWide = TRUE;
-#else
-	lpDropFileStruct->fWide = FALSE;
-#endif
 
 	/* add path to payload */
 	_tcscpy((LPTSTR)&lpDropFileStruct[1], pszPath);
@@ -1920,21 +1916,12 @@ bool ExplorerDialog::doPaste(LPCTSTR pszTo, LPDROPFILES hData, const DWORD & dwE
 	LPVOID		pPld					= (LPBYTE)hData + headerSize;
 	LPTSTR		lpszFilesFrom			= NULL;
 
-#ifdef _UNICODE
 	if (((LPDROPFILES)hData)->fWide == TRUE) {
 		lpszFilesFrom = (LPWSTR)pPld;
 	} else {
 		lpszFilesFrom = new TCHAR[payloadSize];
 		::MultiByteToWideChar(CP_ACP, 0, (LPCSTR)pPld, payloadSize, lpszFilesFrom, payloadSize);
 	}
-#else
-	if (((LPDROPFILES)hData)->fWide == TRUE) {
-		lpszFilesFrom = new CHAR[payloadSize/2];
-		::WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)pPld, payloadSize, lpszFilesFrom, payloadSize/2, NULL, NULL);
-	} else {
-		lpszFilesFrom = (LPSTR)pPld;
-	}
-#endif
 
 	if (lpszFilesFrom != NULL)
 	{
@@ -1975,11 +1962,7 @@ bool ExplorerDialog::doPaste(LPCTSTR pszTo, LPDROPFILES hData, const DWORD & dwE
 			::SetTimer(_hSelf, EXT_UPDATEACTIVATEPATH, 200, NULL);
 		}
 
-#ifdef _UNICODE
 		if (((LPDROPFILES)hData)->fWide == FALSE) {
-#else
-		if (((LPDROPFILES)hData)->fWide == TRUE) {
-#endif
 			delete [] lpszFilesFrom;
 		}
 	}

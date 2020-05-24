@@ -216,13 +216,8 @@ typedef struct {
 	BOOL			bAutoUpdate;
 	eSizeFmt		fmtSize;
 	eDateFmt		fmtDate;
-#ifdef _UNICODE
 	vector<wstring>	vStrFilterHistory;
 	wstring			strLastFilter;
-#else
-	vector<string>	vStrFilterHistory;
-	string			strLastFilter;
-#endif
 	UINT			uTimeout;
 	BOOL			bUseSystemIcons;
 	tNppExecProp	nppExecProp;
@@ -304,7 +299,7 @@ void ScreenToClient(HWND hWnd, RECT* rect);
 void ErrorMessage(DWORD err);
 
 /* Helper functions for NppExec */
-BOOL ConvertCall(LPTSTR pszExplArg, LPTSTR pszName, LPTSTR *p_pszNppArg, vector<string> vFileList);
+BOOL ConvertCall(LPTSTR pszExplArg, LPTSTR pszName, LPTSTR *p_pszNppArg, vector<wstring> vFileList);
 
 #endif //EXPLORER_H
 

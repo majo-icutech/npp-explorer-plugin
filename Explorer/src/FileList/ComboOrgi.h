@@ -25,10 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 using namespace std;
 
-#ifdef _UNICODE
-#define string	wstring
-#endif
-
 class ComboOrgi
 {
 public :
@@ -43,8 +39,8 @@ public :
 	void getText(LPTSTR pszText, UINT size = MAX_PATH);
 	bool getSelText(LPTSTR pszText);
 
-	void setComboList(vector<string> vStrList);
-	void getComboList(vector<string> & vStrList);
+	void setComboList(vector<wstring> vStrList);
+	void getComboList(vector<wstring> & vStrList);
 
 	void clearComboList(void)
 	{
@@ -58,8 +54,8 @@ private :
 	HWND					_hCombo;
     WNDPROC					_hDefaultComboProc;
 
-	string					_currData;
-	vector<string>			_comboItems;
+	wstring					_currData;
+	vector<wstring>			_comboItems;
 
 	LRESULT runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK wndDefaultProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {

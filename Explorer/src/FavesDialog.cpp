@@ -1759,7 +1759,7 @@ void FavesDialog::SortElementsRecursive(vector<tItemElement> & vElement, int d, 
 {
 	int		i	= 0;
 	int		j	= 0;
-	string	str = _T("");
+	wstring	str = _T("");
 
 	/* return on empty list */
 	if (d > h || d < 0)
@@ -1865,7 +1865,6 @@ void FavesDialog::ReadSettings(void)
 				/* read data from file */
 				::ReadFile(hFile, data, size, &hasRead, NULL);
 
-#ifdef UNICODE
 				TCHAR	szBOM = 0xFEFF;
 				if (data[0] != szBOM)
 				{
@@ -1875,10 +1874,6 @@ void FavesDialog::ReadSettings(void)
 				{
 					ptr = data + 1;
 					ptr = _tcstok(ptr, _T("\n"));
-#else
-					/* get first element */
-					ptr = _tcstok(data, _T("\n"));
-#endif
 
 					/* finaly, fill out the tree and the vDB */
 					for (int i = 0; i < FAVES_ITEM_MAX; i++)
@@ -1908,9 +1903,7 @@ void FavesDialog::ReadSettings(void)
 						/* now read the information */
 						ReadElementTreeRecursive(_vDB.begin() + i, &ptr);
 					}
-#ifdef UNICODE
 				}
-#endif
 				delete [] data;
 			}
 		}
@@ -2025,10 +2018,7 @@ void FavesDialog::SaveSettings(void)
 	LPTSTR			saveFilePath	= (LPTSTR)new TCHAR[MAX_PATH];
 	DWORD			hasWritten		= 0;
 	HANDLE			hFile			= NULL;
-
-#ifdef UNICODE
 	BYTE			szBOM[]			= {0xFF, 0xFE};
-#endif
 
 	_tcscpy(saveFilePath, configPath);
 	_tcscat(saveFilePath, FAVES_DATA);
@@ -2037,9 +2027,7 @@ void FavesDialog::SaveSettings(void)
 
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
-#ifdef UNICODE
 		::WriteFile(hFile, szBOM, sizeof(szBOM), &hasWritten, NULL);
-#endif
 
 		/* delete allocated resources */
 		HTREEITEM	hItem = TreeView_GetNextItem(_hTreeCtrl, TVI_ROOT, TVGN_CHILD);

@@ -72,11 +72,7 @@ private:
 	BOOL			_seeDetails;
 	PELEM			_pElem;
 	INT				_iUImgPos;
-#ifdef _UNICODE
 	wstring			_strGroupName;
-#else
-	string			_strGroupName;
-#endif
 	TCHAR			_szDetails[20];
 };
 
