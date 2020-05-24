@@ -787,19 +787,11 @@ void ContextMenu::openFileInOtherView(void)
 void ContextMenu::openFileInNewInstance(void)
 {
 	wstring	args2Exec;
-	extern	HANDLE		g_hModule;
-	TCHAR				szNpp[MAX_PATH];
+	TCHAR	szNpp[MAX_PATH];
 
-    // get path name
-	GetModuleFileName((HMODULE)g_hModule, szNpp, sizeof(szNpp));
-
-    // remove the module name : get plugins directory path
-	PathRemoveFileSpec(szNpp);
-	PathRemoveFileSpec(szNpp);
-
-	/* add notepad as default program */
-	_tcscat(szNpp, _T("\\"));
-	_tcscat(szNpp, _T("notepad++.exe"));
+	// Get notepad++ path
+	::SendMessage(_hWndNpp, NPPM_GETNPPDIRECTORY, MAX_PATH, (LPARAM)szNpp);
+	PathAppend(szNpp, _T("notepad++.exe"));
 
 	for (UINT i = 0; i < _strArray.size(); i++)
 	{

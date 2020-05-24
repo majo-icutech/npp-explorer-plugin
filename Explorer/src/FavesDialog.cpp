@@ -1353,26 +1353,16 @@ void FavesDialog::OpenContext(HTREEITEM hItem, POINT pt)
 				}
 				case FM_OPENNEWINSTANCE:
 				{
-					extern	HANDLE		g_hModule;
-					LPTSTR				pszNpp		= (LPTSTR)new TCHAR[MAX_PATH];
-					LPTSTR				pszParams	= (LPTSTR)new TCHAR[MAX_PATH];
+					TCHAR	szNpp[MAX_PATH];
+					TCHAR	szParams[MAX_PATH];
 
-					// get path name
-					GetModuleFileName((HMODULE)g_hModule, pszNpp, MAX_PATH);
+					// Get notepad++ path
+					::SendMessage(_hParent, NPPM_GETNPPDIRECTORY, MAX_PATH, (LPARAM)szNpp);
+					PathAppend(szNpp, _T("notepad++.exe"));
 
-					// remove the module name : get plugins directory path
-					PathRemoveFileSpec(pszNpp);
-					PathRemoveFileSpec(pszNpp);
+					_stprintf(szParams, _T("-multiInst %s"), pElem->pszLink);
+					::ShellExecute(_hParent, _T("open"), szNpp, szParams, _T("."), SW_SHOW);
 
-					/* add notepad as default program */
-					_tcscat(pszNpp, _T("\\"));
-					_tcscat(pszNpp, _T("notepad++.exe"));
-
-					_stprintf(pszParams, _T("-multiInst %s"), pElem->pszLink);
-					::ShellExecute(_hParent, _T("open"), pszNpp, pszParams, _T("."), SW_SHOW);
-
-					delete [] pszNpp;
-					delete [] pszParams;
 					break;
 				}
 				case FM_ADDTOSESSION:
