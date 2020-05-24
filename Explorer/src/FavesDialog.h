@@ -76,6 +76,8 @@ public:
 	void SaveSession(void);
 	void NotifyNewFile(void);
 
+	void UpdateColors();
+
 protected:
 
 	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;

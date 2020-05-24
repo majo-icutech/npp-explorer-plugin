@@ -299,7 +299,8 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 									HDC		hMemDc		= ::CreateCompatibleDC(lpCD->nmcd.hdc);
 									HBITMAP	hBmp		= ::CreateCompatibleBitmap(lpCD->nmcd.hdc, rcDc.right - rcDc.left, rcDc.bottom - rcDc.top);
 									HBITMAP hOldBmp		= (HBITMAP)::SelectObject(hMemDc, hBmp);
-									HBRUSH	hBrush		= ::CreateSolidBrush(::GetSysColor(COLOR_WINDOW));
+									HBRUSH	hBrush		= ::CreateSolidBrush(TreeView_GetBkColor(_hTreeCtrl));
+									
 
 									/* get item info */
 									INT		iIcon		= 0;
@@ -310,8 +311,8 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 									/* get item rect */
 									TreeView_GetItemRect(_hTreeCtrl, hItem, &rc, TRUE);
 
-									rc.left -= 19;
-									rc.right = rc.left + 16;
+									rc.left -= 22;
+									rc.right = rc.left + 18;
 
 									/* set transparent mode */
 									::SetBkMode(hMemDc, TRANSPARENT);
@@ -2107,4 +2108,15 @@ void FavesDialog::SaveElementTreeRecursive(PELEM pElem, HANDLE hFile)
 			delete [] temp;
 		}
 	}
+}
+
+void FavesDialog::UpdateColors()
+{
+	auto bgColor = (COLORREF)::SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR, 0, 0);
+	auto fgColor = (COLORREF)::SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR, 0, 0);
+
+	TreeView_SetBkColor(_hTreeCtrl, bgColor);
+	TreeView_SetTextColor(_hTreeCtrl, fgColor);
+
+	::InvalidateRect(_hTreeCtrl, NULL, TRUE);
 }

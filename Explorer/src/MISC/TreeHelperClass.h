@@ -39,15 +39,6 @@ typedef struct {
 	HTREEITEM			hLastItem;
 } tTreeIconUpdate;
 
-
-
-#ifndef TreeView_GetItemState
-#define TVM_GETITEMSTATE (TV_FIRST+39)
-#define TreeView_GetItemState(hwndTV, hti, mask) \
-(UINT)::SendMessage((hwndTV), TVM_GETITEMSTATE, (WPARAM)(hti), (LPARAM)(mask))
-#endif
-
-
 class TreeHelper
 {
 public:

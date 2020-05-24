@@ -281,11 +281,13 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *notifyCode)
 		if (notifyCode->nmhdr.code == NPPN_READY)
 		{
 			explorerDlg.initFinish();
+			favesDlg.UpdateColors();
 			isNotepadCreated = TRUE;
 		}
 		if (notifyCode->nmhdr.code == NPPN_WORDSTYLESUPDATED)
 		{
 			explorerDlg.UpdateColors();
+			favesDlg.UpdateColors();
 		}
 	}
 }
@@ -576,9 +578,6 @@ bool IsValidFileName(LPTSTR pszFileName)
 {
 	if (_tcspbrk(pszFileName, _T("\\/:*?\"<>")) == NULL)
 		return true;
-
-	TCHAR	TEMP[128];
-	TCHAR	msgBoxTxt[128];
 
 	::MessageBox(NULL, _T("Filename does not contain any of this characters:\n       \\ / : * ? \" < >"), _T("Error"), MB_OK);
 	return false;
