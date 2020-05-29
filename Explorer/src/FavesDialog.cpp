@@ -24,10 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ExplorerResource.h"
 #include "NewDlg.h"
 #include "Scintilla.h"
-#include "ToolTip.h"
 #include "menuCmdID.h"
-#include "resource.h"
-#include <dbt.h>
 #include <algorithm>
 
 #include <windowsx.h>
@@ -39,9 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma warning(pop)
 
 extern winVer gWinVersion;
-
-
-static void GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName);
 
 static ToolBarButtonUnit toolBarIcons[] = {
 	
@@ -356,6 +350,16 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 					return TRUE;
 				}
 				break;
+			}
+			else if (nmhdr->code == TTN_GETDISPINFO)
+			{
+				LPTOOLTIPTEXT lpttt = (LPTOOLTIPTEXT)nmhdr;
+				lpttt->hinst = _hInst;
+
+				// Specify the resource identifier of the descriptive 
+				// text for the given button.
+				lstrcpy(lpttt->lpszText, szToolTip[lpttt->hdr.idFrom - IDM_EX_LINK_NEW_FILE]);
+				return TRUE;
 			}
 
 			DockingDlgInterface::run_dlgProc(Message, wParam, lParam);

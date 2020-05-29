@@ -628,8 +628,6 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 			}
 			case NM_CUSTOMDRAW:
 			{
-				static TCHAR text[MAX_PATH];
-
 				LPNMLVCUSTOMDRAW lpCD = (LPNMLVCUSTOMDRAW)lParam;
 
 				switch (lpCD->nmcd.dwDrawStage)

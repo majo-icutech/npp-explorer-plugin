@@ -25,10 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "FavesDialog.h"
 #include "OptionDialog.h"
 #include "HelpDialog.h"
-#include "ToolTip.h"
 #include "SysMsg.h"
 #include <stdlib.h>
-#include <iostream>
 #include <shellapi.h>
 #include <shlwapi.h>
 #include <shlobj.h>

@@ -24,8 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ContextMenu.h"
 #include "NewDlg.h"
 #include "Scintilla.h"
-#include "ToolTip.h"
-#include "resource.h"
 
 #include <windowsx.h>
 #include <shellapi.h>
@@ -34,23 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma warning(disable: 4091)
 #include <shlobj.h>
 #pragma warning(pop)
-#include <dbt.h>
-
-
-ToolTip		toolTip;
-
-
-BOOL	DEBUG_ON		= FALSE;
-#define DEBUG_FLAG(x)	if(DEBUG_ON == TRUE) DEBUG(x);
-
-#ifndef CSIDL_PROFILE
-#define CSIDL_PROFILE (0x0028)
-#endif
 
 HANDLE g_hEvent[EID_MAX]	= {NULL};
 HANDLE g_hThread			= NULL;
-
-
 
 DWORD WINAPI UpdateThread(LPVOID lpParam)
 {

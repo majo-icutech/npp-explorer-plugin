@@ -24,15 +24,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "DockingDlgInterface.h"
 #include "TreeHelperClass.h"
 #include "FileList.h"
-#include "ComboOrgi.h"
 #include "Toolbar.h"
 #include "PropDlg.h"
 
 #include "Explorer.h"
-#include "ExplorerResource.h"
-
-using namespace std;
-
 
 typedef enum eMenuID {
 	FM_NEWLINK = 1,
