@@ -22,9 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define FILELIST_DEFINE_H
 
 #include "Explorer.h"
-#include "ExplorerResource.h"
 #include "ToolBar.h"
-#include "ToolTip.h"
 #include "window.h"
 #include "DragDropImpl.h"
 #pragma warning(push)
@@ -122,8 +120,6 @@ protected:
 	void ReadIconToList(UINT iItem, LPINT piIcon, LPINT piOverlayed);
 	void ReadArrayToList(LPTSTR szItem, INT iItem ,INT iSubItem);
 
-	void ShowToolTip(const LVHITTESTINFO & hittest);
-
 	void DrawDivider(UINT x);
 	void UpdateList(void);
 	void SetColumns(void);
@@ -209,11 +205,6 @@ private:
 	INT							_iMouseTrackItem;
 	LONG						_lMouseTrackPos;
 	INT							_iBltPos;
-
-	/* tooltip values */
-	ToolTip						_pToolTip;
-	UINT						_iItem;
-	UINT						_iSubItem;
 
 	/* current file filter */
 	TCHAR						_szFileFilter[MAX_PATH];
