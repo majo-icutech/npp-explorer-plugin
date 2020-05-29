@@ -140,8 +140,8 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 	::SetWindowLongPtr(_hSelf, GWL_STYLE, dwStyle | LVS_REPORT | LVS_OWNERDATA | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS);
 
 	/* enable full row select */
-	ListView_SetExtendedListViewStyle(_hSelf, LVS_EX_FULLROWSELECT);
-	ListView_SetCallbackMask(_hSelf, LVIS_OVERLAYMASK);
+	ListView_SetExtendedListViewStyle(_hSelf, LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
+	ListView_SetCallbackMask(_hSelf, LVIS_OVERLAYMASK | LVIS_CUT);
 
 	/* subclass list control */
 	lpFileListClass = this;
@@ -571,16 +571,31 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 		{
 			case LVN_GETDISPINFO:
 			{
-				LV_ITEM &lvItem = reinterpret_cast<LV_DISPINFO*>((LV_DISPINFO FAR *)lParam)->item;
+				NMLVDISPINFO* dispInfo = (LV_DISPINFO*)lParam;
+				LV_ITEM& lvItem = dispInfo->item;
 
 				if (lvItem.mask & LVIF_TEXT)
 				{
 					/* must be a cont array */
 					static TCHAR	str[MAX_PATH];
 
-					ReadArrayToList(str, lvItem.iItem ,lvItem.iSubItem);
-					lvItem.pszText		= str;
-					lvItem.cchTextMax	= _tcslen(str);
+					ReadArrayToList(str, lvItem.iItem, lvItem.iSubItem);
+					lvItem.pszText = str;
+					lvItem.cchTextMax = _tcslen(str);
+				}
+				if (lvItem.mask & LVIF_IMAGE && !_vFileList[lvItem.iItem].bParent)
+				{
+					INT			iIcon = 0;
+					INT			iOverlay = 0;
+					
+					ReadIconToList(lvItem.iItem, &iIcon, &iOverlay);
+
+					lvItem.iImage = iIcon;
+					lvItem.state = INDEXTOOVERLAYMASK(iOverlay);					
+				}
+				if (lvItem.mask & LVIF_STATE && _vFileList[lvItem.iItem].bHidden)
+				{
+					lvItem.state |= LVIS_CUT;
 				}
 				break;
 			}
@@ -675,132 +690,43 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 				{
 					case CDDS_PREPAINT:
 					{
-						SetWindowLongPtr(_hParent, DWLP_MSGRESULT, (LONG)(CDRF_NOTIFYITEMDRAW));
+						SetWindowLongPtr(_hParent, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW);
 						return TRUE;
 					}
 					case CDDS_ITEMPREPAINT:
 					{
-						SetWindowLongPtr(_hParent, DWLP_MSGRESULT, (LONG)(CDRF_NOTIFYSUBITEMDRAW));
-						return TRUE;
-					}
-					case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
-					{
-						if (((lpCD->iSubItem > 1) && (_pExProp->bAddExtToName == TRUE)) ||
-							((lpCD->iSubItem > 0) && (_pExProp->bAddExtToName == FALSE)))
-							return FALSE;
-
-						auto bgColor = ListView_GetBkColor(_hSelf);
-						auto fgColor = ListView_GetTextColor(_hSelf);
-
-						UINT	iItem		= (UINT)lpCD->nmcd.dwItemSpec;
-						RECT	rc			= {0};
-						RECT	rcDc		= {0};
-
-						/* get state of element */
-						UINT state = ListView_GetItemState(_hSelf, iItem, 0xFF);
-						bool isSel = ((state & LVIS_SELECTED) ? (::GetFocus() == _hSelf) : ((state & LVIS_DROPHILITED) == LVIS_DROPHILITED));
-
-						/* get window rect */
-						::GetWindowRect(_hSelf, &rcDc);
-
-						/* create memory DC for flicker free paint */
-						HDC		hMemDc		= ::CreateCompatibleDC(lpCD->nmcd.hdc);
-						HBITMAP	hBmp		= ::CreateCompatibleBitmap(lpCD->nmcd.hdc, rcDc.right - rcDc.left, rcDc.bottom - rcDc.top);
-						HBITMAP hOldBmp		= (HBITMAP)::SelectObject(hMemDc, hBmp);
-
-						/* get text rect */
-						ListView_GetSubItemRect(_hSelf, iItem, lpCD->iSubItem, LVIR_LABEL, &rc);
-
-						/* draw background color of item */
-						HBRUSH	hBrush = NULL;
-						if (state & (LVIS_SELECTED | LVIS_DROPHILITED)) {
-							hBrush = ::CreateSolidBrush(::GetSysColor(isSel ? COLOR_HIGHLIGHT : COLOR_BTNFACE));
-							::FillRect(hMemDc, &rc, hBrush);
-							::DeleteObject(hBrush);
-							hBrush = NULL;
-						} else {
-							hBrush = ::CreateSolidBrush(bgColor);
-							::FillRect(hMemDc, &rc, hBrush);
-						}
-
-						/* set transparent mode */
-						::SetBkMode(hMemDc, TRANSPARENT);
-
-						/* calculate correct position */
-						static RECT	rcName		= {0};
-						if (lpCD->iSubItem == 0) {
-							ListView_GetItemText(_hSelf, iItem, 0, text, MAX_PATH);
-							if (_pExProp->bAddExtToName == TRUE) {
-								ListView_GetSubItemRect(_hSelf, iItem, 1, LVIR_LABEL, &rcName);
-								rcName.left = rc.left;
-							} else {
-								rcName = rc;
-							}
-							rcName.left += 2;
-						}
-
 						/* get correct font */
-						HFONT	hDefFont	= NULL;
+						UINT	iItem = (UINT)lpCD->nmcd.dwItemSpec;
 						if (iItem >= _uMaxFolders) {
-							wstring	strFilePath	= _pExProp->szCurrentPath + _vFileList[iItem].strNameExt;
+							wstring	strFilePath = _pExProp->szCurrentPath + _vFileList[iItem].strNameExt;
 							if (IsFileOpen(strFilePath.c_str()) == TRUE) {
-								hDefFont = (HFONT)::SelectObject(hMemDc, _hFontUnder);
+								::SelectObject(lpCD->nmcd.hdc, _hFontUnder);
+								SetWindowLongPtr(_hParent, DWLP_MSGRESULT, CDRF_NEWFONT);
 							}
 						}
-						if (hDefFont == NULL) {
-							hDefFont = (HFONT)::SelectObject(hMemDc, _hFont);
+						
+						if (_vFileList[iItem].bParent)
+						{
+							SetWindowLongPtr(_hParent, DWLP_MSGRESULT, CDRF_NOTIFYPOSTPAINT);
 						}
-
-						/* set font color */
-						if (state & (LVIS_SELECTED | LVIS_DROPHILITED)) {
-							::SetTextColor(hMemDc, ::GetSysColor(isSel ? COLOR_HIGHLIGHTTEXT : COLOR_BTNTEXT));
-						}
-						else
-							::SetTextColor(hMemDc, fgColor);
-
-						/* draw text to memory */
-						::DrawText(hMemDc, text, _tcslen(text), &rcName, DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX);
-
-						/* blit text */
-						::BitBlt(lpCD->nmcd.hdc, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, hMemDc, rc.left, rc.top, SRCCOPY);
-
-						/* blit icon sequence */
-						if (lpCD->iSubItem == 0) {
-							/* get icon position */
-							ListView_GetSubItemRect(_hSelf, iItem, 0, LVIR_ICON, &rc);
-
-							/* clear background */
-							::FillRect(hMemDc, &rc, hBrush);
-
-							/* first is parent up icon, second folder and file icons with overlay */
-							if ((iItem == 0) && (_vFileList.size() != 0) && (_vFileList[0].bParent == TRUE)) {
-								ImageList_Draw(_hImlParent, ICON_PARENT, hMemDc, rc.left, rc.top, ILD_NORMAL | (isSel ? ILD_SELECTED : 0));
-							} else {
-								INT			iIcon		= 0;
-								INT			iOverlay	= 0;
-								BOOL		isHidden	= FALSE;
-								COLORREF	rgbFg		= (isSel == TRUE ? CLR_DEFAULT : CLR_NONE);
-								UINT		fStyle		= (isSel == TRUE ? ILD_SELECTED : ILD_NORMAL);
-
-								/* get current list, read info and draw icon */
-								HIMAGELIST	hImgLstCur = (_pExProp->bUseSystemIcons ? _hImlListSys : _hImlParent);
-								ReadIconToList(iItem, &iIcon, &iOverlay, &isHidden);
-
-								fStyle = (isHidden == TRUE ? ILD_BLEND : fStyle);
-								ImageList_DrawEx(hImgLstCur, iIcon, hMemDc, rc.left, rc.top, 0, 0, CLR_NONE, rgbFg, fStyle | INDEXTOOVERLAYMASK(iOverlay));
-							}
-							/* blit icon */
-							::BitBlt(lpCD->nmcd.hdc, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, hMemDc, rc.left, rc.top, SRCCOPY);
-						}
-
-						::SelectObject(hMemDc, hOldBmp);
-						::SelectObject(hMemDc, hDefFont);
-						::DeleteObject(hBrush);
-						::DeleteObject(hBmp);
-						::DeleteDC(hMemDc);
-
-						SetWindowLongPtr(_hParent, DWLP_MSGRESULT, (LONG)(CDRF_SKIPDEFAULT));
+						
 						return TRUE;
+					}					
+					case CDDS_ITEMPOSTPAINT:
+					{
+						UINT	iItem = (UINT)lpCD->nmcd.dwItemSpec;
+						
+						RECT rc = { 0 };
+						ListView_GetSubItemRect(_hSelf, iItem, lpCD->iSubItem, LVIR_ICON, &rc);
+
+						UINT state = ListView_GetItemState(_hSelf, iItem, LVIS_SELECTED);
+						bool isSel = ((state & LVIS_SELECTED) ? (::GetFocus() == _hSelf) : ((state & LVIS_DROPHILITED) == LVIS_DROPHILITED));
+						
+						ImageList_Draw(_hImlParent, ICON_PARENT, lpCD->nmcd.hdc, rc.left, rc.top, ILD_NORMAL | (isSel ? ILD_SELECTED : 0));
+						
+						return TRUE;
+						
+						break;
 					}
 					default:
 						return FALSE;
@@ -1034,7 +960,7 @@ void FileList::UpdateOverlayIcon(void)
 	}
 }
 
-void FileList::ReadIconToList(UINT iItem, LPINT piIcon, LPINT piOverlay, LPBOOL pbHidden)
+void FileList::ReadIconToList(UINT iItem, LPINT piIcon, LPINT piOverlay)
 {
 	INT			iIconSelected	= 0;
 	eDevType	type			= (iItem < _uMaxFolders ? DEVT_DIRECTORY : DEVT_FILE);
@@ -1045,7 +971,6 @@ void FileList::ReadIconToList(UINT iItem, LPINT piIcon, LPINT piOverlay, LPBOOL 
 	}
 	*piIcon		= _vFileList[iItem].iIcon;
 	*piOverlay	= _vFileList[iItem].iOverlay;
-	*pbHidden	= _vFileList[iItem].bHidden;
 }
 
 void FileList::ReadArrayToList(LPTSTR szItem, INT iItem ,INT iSubItem)

@@ -84,6 +84,7 @@ public:
 	virtual void destroy() {};
 	virtual void redraw(void) {
 		_hImlListSys = GetSmallImageList(_pExProp->bUseSystemIcons);
+		ListView_SetImageList(_hSelf, _hImlListSys, LVSIL_SMALL);
 		SetColumns();
 		Window::redraw();
 	};
@@ -118,7 +119,7 @@ protected:
 		return (lpFileListClass->runHeaderProc(hwnd, Message, wParam, lParam));
 	};
 
-	void ReadIconToList(UINT iItem, LPINT piIcon, LPINT piOverlayed, LPBOOL pbHidden);
+	void ReadIconToList(UINT iItem, LPINT piIcon, LPINT piOverlayed);
 	void ReadArrayToList(LPTSTR szItem, INT iItem ,INT iSubItem);
 
 	void ShowToolTip(const LVHITTESTINFO & hittest);
