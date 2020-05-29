@@ -157,7 +157,6 @@ ExplorerDialog::ExplorerDialog(void) : DockingDlgInterface(IDD_EXPLORER_DLG)
 	_bOldRectInitilized		= FALSE;
 	_hExploreVolumeThread	= NULL;
 	_hItemExpand			= NULL;
-	TreeHelper::UseOverlayThreading();
 }
 
 ExplorerDialog::~ExplorerDialog(void)

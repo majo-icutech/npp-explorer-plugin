@@ -27,35 +27,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace std;
 
-enum {
-	ICON_UPDATE_EVT_START,
-	ICON_UPDATE_EVT_RESP,
-	ICON_UPDATE_EVT_END,
-	ICON_UPDATE_EVT_MAX
-};
-
-typedef struct {
-	wstring				strLastPath;
-	HTREEITEM			hLastItem;
-} tTreeIconUpdate;
 
 class TreeHelper
 {
 public:
-	TreeHelper() : _hTreeCtrl(NULL), _hSemaphore(NULL) {};
+	TreeHelper() : _hTreeCtrl(NULL) {};
 	~TreeHelper() {
-		if (_hSemaphore)
-		{
-			::SetEvent(_hEvent[ICON_UPDATE_EVT_END]);
-			::WaitForSingleObject(_hEvent[ICON_UPDATE_EVT_RESP], INFINITE);
-
-			for (UINT i = 0; i < ICON_UPDATE_EVT_MAX; i++) {
-				::CloseHandle(_hEvent[i]);
-				_hEvent[i] = NULL;
-			}
-			::CloseHandle(_hSemaphore);
-			_vIconUpdate.clear();
-		}
 	};
 
 	void UpdateOverlayIcon(void);
@@ -86,30 +63,8 @@ private:
 	void QuickSortItems(vector<tItemList>* vList, INT d, INT h);
 	BOOL FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem);
 
-private:	/* for thread */
-
-	void SetOverlayIcon(HTREEITEM hItem, INT iOverlayIcon);
-	void TREE_LOCK(void) {
-		while (_hSemaphore) {
-			if (::WaitForSingleObject(_hSemaphore, INFINITE) == WAIT_OBJECT_0)
-				return;
-		}
-	};
-	void TREE_UNLOCK(void) {
-		if (_hSemaphore) {
-			::ReleaseSemaphore(_hSemaphore, 1, NULL);
-		}
-	};
-
 protected:
 	HWND				_hTreeCtrl;
-
-private:
-	/* member var for overlay update thread */
-	vector<tTreeIconUpdate>		_vIconUpdate;
-	HANDLE						_hSemaphore;
-	HANDLE						_hEvent[ICON_UPDATE_EVT_MAX];
-	HANDLE						_hOverThread;
 };
 
 #endif // TREEHELPERCLASS_H
