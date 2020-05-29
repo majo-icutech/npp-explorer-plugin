@@ -54,7 +54,7 @@ LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 	{
 		case WM_KEYUP:
 		{
-			if (wParam == 13)
+			if (wParam == VK_RETURN)
 			{
 				TCHAR	pszText[MAX_PATH];
 

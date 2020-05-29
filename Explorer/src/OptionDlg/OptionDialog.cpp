@@ -91,11 +91,12 @@ INT_PTR CALLBACK OptionDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lPar
 					{
 						// If we were able to get the shell malloc object,
 						// then proceed by initializing the BROWSEINFO stuct
+						TCHAR displayName[MAX_PATH];
 						BROWSEINFO info;
-						ZeroMemory(&info, sizeof(info));
+						ZeroMemory(&info, sizeof(info));						
 						info.hwndOwner			= _hParent;
 						info.pidlRoot			= NULL;
-						info.pszDisplayName		= (LPTSTR)new TCHAR[MAX_PATH];
+						info.pszDisplayName		= displayName;
 						info.lpszTitle			= _T("Select a folder:");
 						info.ulFlags			= BIF_RETURNONLYFSDIRS;
 						info.lpfn				= BrowseCallbackProc;
@@ -118,7 +119,6 @@ INT_PTR CALLBACK OptionDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lPar
 							pShellMalloc->Free(pidl);
 						}
 						pShellMalloc->Release();
-						delete [] info.pszDisplayName;
 					}
 					break;
 				}

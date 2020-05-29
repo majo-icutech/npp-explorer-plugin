@@ -198,11 +198,12 @@ INT_PTR CALLBACK PropDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam
 						{
 							// If we were able to get the shell malloc object,
 							// then proceed by initializing the BROWSEINFO stuct
+							TCHAR displayName[MAX_PATH];
 							BROWSEINFO info;
 							ZeroMemory(&info, sizeof(info));
 							info.hwndOwner			= _hParent;
 							info.pidlRoot			= NULL;
-							info.pszDisplayName		= (LPTSTR)new TCHAR[MAX_PATH];
+							info.pszDisplayName		= displayName;
 							info.lpszTitle			= _T("Select a folder:");
 							info.ulFlags			= BIF_RETURNONLYFSDIRS;
 							info.lpfn				= BrowseCallbackProc;
@@ -225,7 +226,6 @@ INT_PTR CALLBACK PropDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam
 								pShellMalloc->Free(pidl);
 							}
 							pShellMalloc->Release();
-							delete [] info.pszDisplayName;
 						}
 					}
 					else
@@ -283,7 +283,7 @@ INT_PTR CALLBACK PropDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam
 					}
 					else
 					{
-						::MessageBox(_hParent, _T("Fill out all fields!"), _T("Error"), MB_OK);
+						::MessageBox(_hSelf, _T("Fill out all fields!"), _T("Error"), MB_OK);
 					}
 					break;
 				}
