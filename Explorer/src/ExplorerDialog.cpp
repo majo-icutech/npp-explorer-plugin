@@ -365,6 +365,16 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 				}
 				break;
 			}
+			else if (nmhdr->code == TTN_GETDISPINFO)
+			{
+				LPTOOLTIPTEXT lpttt = (LPTOOLTIPTEXT)nmhdr;
+				lpttt->hinst = _hInst;
+
+				// Specify the resource identifier of the descriptive 
+				// text for the given button.
+				lstrcpy(lpttt->lpszText, szToolTip[lpttt->hdr.idFrom - IDM_EX_PREV]);
+				return TRUE;
+			}
 
 			DockingDlgInterface::run_dlgProc(Message, wParam, lParam);
 
