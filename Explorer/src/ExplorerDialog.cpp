@@ -553,6 +553,8 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 			/* destroy thread */
 			::CloseHandle(g_hThread);
 
+			_ToolBar.destroy();
+
 			/* unsubclass */
 			if (_hDefaultTreeProc != NULL)
 				::SetWindowLongPtr(_hTreeCtrl, GWLP_WNDPROC, (LONG_PTR)_hDefaultTreeProc);

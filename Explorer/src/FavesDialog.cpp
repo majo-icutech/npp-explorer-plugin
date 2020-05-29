@@ -402,6 +402,8 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 			SaveSettings();
 			::DestroyIcon(_data.hIconTab);
 
+			_ToolBar.destroy();
+
 			/* destroy duplicated handle when we are on W2k machine */
 			if (gWinVersion == WV_W2K)
 				ImageList_Destroy(_hImageListSys);
