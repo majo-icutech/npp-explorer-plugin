@@ -49,6 +49,7 @@ typedef struct {
 	INT			iIcon;
 	INT			iOverlay;
 	BOOL		bHidden;
+	BOOL		bFolder;
 	wstring		strName;
 	wstring		strExt;
 	wstring		strSize;
@@ -128,9 +129,6 @@ protected:
 
 	BOOL FindNextItemInList(UINT maxFolder, UINT maxData, LPUINT puPos);
 
-	void QuickSortRecursiveCol(INT d, INT h, INT column, BOOL bAscending);
-	void QuickSortRecursiveColEx(INT d, INT h, INT column, BOOL bAscending);
-
 	void onRMouseBtn();
 	void onLMouseBtnDbl();
 
@@ -188,6 +186,16 @@ private:
 	WNDPROC						_hDefaultHeaderProc;
 
 	tExProp*					_pExProp;
+
+	/* file list comparer */
+	class FileListComparer {
+	public:
+		FileListComparer(int column, bool ascending);
+		bool operator()(tFileListData a, tFileListData b) const;
+	private:
+		int _column;
+		bool _ascending;
+	};
 
 	/* file list owner drawn */
 	HFONT						_hFont;

@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "stdafx.h"
 #include "TreeHelperClass.h"
 #include "Explorer.h"
+#include <algorithm>
 
 
 extern winVer	gWinVersion;
@@ -77,7 +78,7 @@ void TreeHelper::DrawChildren(HTREEITEM parentItem)
 		::FindClose(hFind);
 
 		/* sort data */
-		QuickSortItems(&vFolderList, 0, vFolderList.size()-1);
+		std::sort(vFolderList.begin(), vFolderList.end());
 	 
 		for (iCnt = 0; iCnt < vFolderList.size(); iCnt++)
 		{
@@ -130,7 +131,7 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 		::FindClose(hFind);
 
 		/* sort data */
-		QuickSortItems(&vFolderList, 0, vFolderList.size()-1);
+		std::sort(vFolderList.begin(), vFolderList.end());
 
 		/* update tree */
 		for (iCnt = 0; iCnt < vFolderList.size(); iCnt++)
@@ -234,42 +235,6 @@ BOOL TreeHelper::FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem)
 	}
 
 	return isFound;
-}
-
-void TreeHelper::QuickSortItems(vector<tItemList>* vList, INT d, INT h)
-{
-	INT		i		= 0;
-	INT		j		= 0;
-	wstring	str		= _T("");
-
-	/* return on empty list */
-	if (d > h || d < 0)
-		return;
-
-	i = h;
-	j = d;
-
-	str = (*vList)[((INT) ((d+h) / 2))].strName;
-	do
-	{
-		while (_tcsicmp((*vList)[j].strName.c_str(), str.c_str()) < 0) j++;
-		while (_tcsicmp((*vList)[i].strName.c_str(), str.c_str()) > 0) i--;
-
-		if ( i >= j )
-		{
-			if ( i != j )
-			{
-				tItemList buf = (*vList)[i];
-				(*vList)[i] = (*vList)[j];
-				(*vList)[j] = buf;
-			}
-			i--;
-			j++;
-		}
-	} while (j <= i);
-
-	if (d < i) QuickSortItems(vList, d, i);
-	if (j < h) QuickSortItems(vList, j, h);
 }
 
 HTREEITEM TreeHelper::InsertChildFolder(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter, BOOL bChildrenTest)

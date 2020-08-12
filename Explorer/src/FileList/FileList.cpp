@@ -22,23 +22,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "FileList.h"
 #include "resource.h"
 #include <windows.h>
-
-
-#ifndef LVM_SETSELECTEDCOLUMN
-#define LVM_SETSELECTEDCOLUMN (LVM_FIRST + 140)
-#endif
-
-#ifndef WH_MOUSE_LL
-#define WH_MOUSE_LL 14
-#endif
-
+#include <algorithm>
 
 #define LVIS_SELANDFOC	(LVIS_SELECTED|LVIS_FOCUSED)
 
-
 static HWND		hWndServer		= NULL;
 static HHOOK	hookMouse		= NULL;
-
 
 static LRESULT CALLBACK hookProcMouse(INT nCode, WPARAM wParam, LPARAM lParam)
 {
@@ -896,6 +885,7 @@ void FileList::viewPath(LPCTSTR currentPath, BOOL redraw)
 				tempData.bParent		= FALSE;
 				tempData.iIcon			= -1;
 				tempData.iOverlay		= 0;
+				tempData.bFolder		= TRUE;
 				tempData.bHidden		= ((Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
 				tempData.strName		= Find.cFileName;
 				tempData.strNameExt		= Find.cFileName;
@@ -916,6 +906,7 @@ void FileList::viewPath(LPCTSTR currentPath, BOOL redraw)
 				/* store for correct sorting the complete name (with extension) */
 				tempData.strNameExt		= Find.cFileName;
 				tempData.bParent		= FALSE;
+				tempData.bFolder		= FALSE;
 				tempData.iIcon			= -1;
 				tempData.iOverlay		= 0;
 				tempData.bHidden		= ((Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
@@ -951,6 +942,7 @@ void FileList::viewPath(LPCTSTR currentPath, BOOL redraw)
 				/* if 'Find' is not a folder but a parent one */
 				tempData.bParent		= TRUE;
 				tempData.bHidden		= FALSE;
+				tempData.bFolder		= TRUE;
 				tempData.strName		= Find.cFileName;
 				tempData.strNameExt		= Find.cFileName;
 				tempData.strExt			= _T("");
@@ -982,19 +974,13 @@ void FileList::viewPath(LPCTSTR currentPath, BOOL redraw)
 	/* delete old global list */
 	_vFileList.clear();
 
-	/* set temporal list as global */
-	for (UINT i = 0; i < vFoldersTemp.size(); i++) {
-		_vFileList.push_back(vFoldersTemp[i]);
-	}
-	for (UINT i = 0;i < vFilesTemp.size(); i++) {
-		_vFileList.push_back(vFilesTemp[i]);
-	}
+	/* copy folders and files list into global array */
+	_vFileList.insert(_vFileList.end(), vFoldersTemp.begin(), vFoldersTemp.end());
+	_vFileList.insert(_vFileList.end(), vFilesTemp.begin(), vFilesTemp.end());
 
 	/* set max elements in list */
 	_uMaxFolders	= vFoldersTemp.size();
 	_uMaxElements	= _uMaxFolders + vFilesTemp.size();
-	vFoldersTemp.clear();
-	vFilesTemp.clear();
 
 	/* update list content */
 	UpdateList();
@@ -1060,8 +1046,9 @@ void FileList::SelectCurFile(void)
 
 void FileList::UpdateList(void)
 {
-	QuickSortRecursiveCol(_pExProp->szCurrentPath[3] != '\0', _uMaxFolders-1, 0, TRUE);
-	QuickSortRecursiveColEx(_uMaxFolders, _uMaxElements-1, _pExProp->iSortPos, _pExProp->bAscending);
+	/* sort files and folders*/
+	FileListComparer comparer(_pExProp->iSortPos, _pExProp->bAscending);
+	std::sort(_vFileList.begin(), _vFileList.end(), comparer);
 
 	/* avoid flickering */
 	if (_uMaxElementsOld != _uMaxElements) {
@@ -1379,184 +1366,6 @@ BOOL FileList::FindNextItemInList(UINT maxFolder, UINT maxData, LPUINT puPos)
 	}
 
 	return bRet;
-}
-
-
-/******************************************************************************************
- *	 fast recursive Quicksort of vList; bAscending TRUE == down 
- */
-void FileList::QuickSortRecursiveCol(INT d, INT h, INT column, BOOL bAscending)
-{
-	INT		i		= 0;
-	INT		j		= 0;
-	wstring	str		= _T("");
-	__int64	i64Data	= 0;
-
-	/* return on empty list */
-	if (d > h || d < 0)
-		return;
-
-	i = h;
-	j = d;
-
-	switch (column)
-	{
-		case 0:
-		{
-			str = _vFileList[((INT) ((d+h) / 2))].strNameExt;
-			do
-			{
-				if (bAscending == TRUE)
-				{
-					while (_tcsicmp(_vFileList[j].strNameExt.c_str(), str.c_str()) < 0) j++;
-					while (_tcsicmp(_vFileList[i].strNameExt.c_str(), str.c_str()) > 0) i--;
-				}
-				else
-				{
-					while (_tcsicmp(_vFileList[j].strNameExt.c_str(), str.c_str()) > 0) j++;
-					while (_tcsicmp(_vFileList[i].strNameExt.c_str(), str.c_str()) < 0) i--;
-				}
-				if ( i >= j )
-				{
-					if ( i != j )
-					{
-						tFileListData buf = _vFileList[i];
-						_vFileList[i] = _vFileList[j];
-						_vFileList[j] = buf;
-					}
-					i--;
-					j++;
-				}
-			} while (j <= i);
-			break;
-		}
-		case 1:
-		{
-			str = _vFileList[((INT) ((d+h) / 2))].strExt;
-			do
-			{
-				if (bAscending == TRUE)
-				{
-					while (_tcsicmp(_vFileList[j].strExt.c_str(), str.c_str()) < 0) j++;
-					while (_tcsicmp(_vFileList[i].strExt.c_str(), str.c_str()) > 0) i--;
-				}
-				else
-				{
-					while (_tcsicmp(_vFileList[j].strExt.c_str(), str.c_str()) > 0) j++;
-					while (_tcsicmp(_vFileList[i].strExt.c_str(), str.c_str()) < 0) i--;
-				}
-				if ( i >= j )
-				{
-					if ( i != j )
-					{
-						tFileListData buf = _vFileList[i];
-						_vFileList[i] = _vFileList[j];
-						_vFileList[j] = buf;
-					}
-					i--;
-					j++;
-				}
-			} while (j <= i);
-			break;
-		}
-		case 2:
-		case 3:
-		{
-			i64Data = (column==2?_vFileList[((INT) ((d+h) / 2))].i64Size:_vFileList[((INT) ((d+h) / 2))].i64Date);
-			do
-			{
-				if (bAscending == TRUE)
-				{
-					while ((column==2?_vFileList[j].i64Size:_vFileList[j].i64Date) < i64Data) j++;
-					while ((column==2?_vFileList[i].i64Size:_vFileList[i].i64Date) > i64Data) i--;
-				}
-				else
-				{
-					while ((column==2?_vFileList[j].i64Size:_vFileList[j].i64Date) > i64Data) j++;
-					while ((column==2?_vFileList[i].i64Size:_vFileList[i].i64Date) < i64Data) i--;
-				}
-				if ( i >= j )
-				{
-					if ( i != j )
-					{
-						tFileListData buf = _vFileList[i];
-						_vFileList[i] = _vFileList[j];
-						_vFileList[j] = buf;
-					}
-					i--;
-					j++;
-				}
-			} while (j <= i);
-			break;
-		}
-		default:
-			break;
-	}
-
-	if (d < i) QuickSortRecursiveCol(d,i, column, bAscending);
-	if (j < h) QuickSortRecursiveCol(j,h, column, bAscending);
-}
-
-/******************************************************************************************
- *	extended sort for Quicksort of vList, sort any column and if there are equal content 
- *	sort additional over first column(s)
- */
-void FileList::QuickSortRecursiveColEx(INT d, INT h, INT column, BOOL bAscending)
-{
-	QuickSortRecursiveCol(d, h, column, bAscending);
-
-	switch (column)
-	{
-		case 1:
-		{
-			wstring		str = _T("");
-
-			for (INT i = d; i < h ;)
-			{
-				INT iOld = i;
-
-				str = _vFileList[i].strExt;
-
-				for (bool b = true; b;)
-				{
-					if (str == _vFileList[i].strExt)
-						i++;
-					else
-						b = false;
-					if (i > h)
-						b = false;
-				}
-				QuickSortRecursiveCol(iOld, i-1, 0, TRUE);
-			}
-			break;
-		}
-		case 2:
-		case 3:
-		{
-			__int64	i64Data	= 0;
-
-			for (INT i = d; i < h ;)
-			{
-				INT iOld = i;
-
-				i64Data = (column==2?_vFileList[i].i64Size:_vFileList[i].i64Date);
-
-				for (bool b = true; b;)
-				{
-					if (i64Data == (column==2?_vFileList[i].i64Size:_vFileList[i].i64Date))
-						i++;
-					else
-						b = false;
-					if (i > h)
-						b = false;
-				}
-				QuickSortRecursiveCol(iOld, i-1, 0, TRUE);
-			}
-			break;
-		}
-		default:
-			break;
-	}
 }
 
 void FileList::GetSize(__int64 size, wstring & str)
@@ -2177,4 +1986,70 @@ bool FileList::doPaste(LPCTSTR pszTo, LPDROPFILES hData, const DWORD & dwEffect)
 	return true;
 }
 
+FileList::FileListComparer::FileListComparer(int column, bool ascending) :_column(column), _ascending(ascending) {}
 
+bool FileList::FileListComparer::operator()(tFileListData a, tFileListData b) const
+{
+	// Sort first by bParent
+	if (a.bParent != b.bParent)
+	{
+		return a.bParent > b.bParent;
+	}
+	else
+	{
+		// Then sort by bFolder
+		if (a.bFolder != b.bFolder)
+		{
+			return a.bFolder > b.bFolder;
+		}
+		else
+		{
+			int resultNameExt = _wcsicmp(a.strNameExt.c_str(), b.strNameExt.c_str());
+			__int64 sortResult = 0;
+
+			if (a.bFolder)
+			{
+				// If both are folders, sort by name ascending
+				return resultNameExt < 0;
+			}
+			else
+			{
+				// If both are files, sort using the _column parameter
+				switch (_column)
+				{
+				case 0:
+					// Sort by name
+					sortResult = resultNameExt;
+					break;
+				case 1:
+					// Sort by ext, then by name
+					sortResult = _wcsicmp(a.strExt.c_str(), b.strExt.c_str());
+					break;
+				case 2:
+					// Sort by size, then by name
+					sortResult = a.i64Size - b.i64Size;
+					break;
+				case 3:
+					// Sort by date, then by name
+					sortResult = a.i64Date - b.i64Date;
+					break;
+				default:
+					break;
+				}
+
+				// If the items' primary sort fields are equal, use nameExt as the secondary sort field
+				if (sortResult == 0)
+				{
+					sortResult = resultNameExt;
+				}
+
+				// If we need to sort descending, reverse the order
+				if (!_ascending)
+				{
+					sortResult *= -1;
+				}
+			}
+			return sortResult < 0;
+		}
+	}
+}

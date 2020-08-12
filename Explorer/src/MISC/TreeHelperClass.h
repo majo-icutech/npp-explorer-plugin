@@ -55,8 +55,10 @@ private:
 	struct tItemList {
 		wstring	strName;
 		DWORD	dwAttributes;
+		bool operator< (const tItemList& other) const {
+			return _wcsicmp(strName.c_str(), other.strName.c_str()) < 0;
+		}
 	};
-	void QuickSortItems(vector<tItemList>* vList, INT d, INT h);
 	BOOL FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem);
 
 protected:
