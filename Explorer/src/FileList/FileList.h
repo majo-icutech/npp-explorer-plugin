@@ -71,6 +71,7 @@ public:
 	
 	void init(HINSTANCE hInst, HWND hParent, HWND hParentList);
 	void initProp(tExProp* prop);
+	void initFont();
 
 	void viewPath(LPCTSTR currentPath, BOOL redraw = FALSE);
 
@@ -82,6 +83,7 @@ public:
 
 	virtual void destroy() {};
 	virtual void redraw(void) {
+		initFont();
 		_hImlListSys = GetSmallImageList(_pExProp->bUseSystemIcons);
 		ListView_SetImageList(_hSelf, _hImlListSys, LVSIL_SMALL);
 		SetColumns();

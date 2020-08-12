@@ -63,6 +63,8 @@ public:
     void init(HINSTANCE hInst, NppData nppData, tExProp *prop);
 
 	virtual void redraw(void) {
+		/* possible new font */
+		InitialFont();
 		/* possible new imagelist -> update the window */
 		::SendMessage(_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)GetSmallImageList(_pExProp->bUseSystemIcons));
 		::SetTimer(_hSelf, EXT_UPDATEDEVICE, 0, NULL);
@@ -111,6 +113,7 @@ protected:
 	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
 
 	void InitialDialog(void);
+	void InitialFont(void);
 
 	void UpdateDevices(void);
 	void UpdateFolders(void);
@@ -154,7 +157,7 @@ private:
 	HWND					_hHeader;
 	HWND					_hSplitterCtrl;
 	HWND					_hFilter;
-	HWND					_hFilterButton;
+	HWND					_hFilterStatic;
 
 	/* classes */
 	FileList				_FileList;

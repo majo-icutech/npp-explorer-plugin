@@ -56,6 +56,7 @@ public:
 
 	virtual void redraw(void) {
 		::RedrawWindow(_ToolBar.getHSelf(), NULL, NULL, TRUE);
+		InitialFont();
 		ExpandElementsRecursive(TVI_ROOT);
 	};
 
@@ -80,6 +81,7 @@ protected:
 	void tb_cmd(UINT message);
 
 	void InitialDialog(void);
+	void InitialFont(void);
 
 	HTREEITEM GetTreeItem(LPCTSTR pszGroupName);
 	PELEM GetElementPointer(LPCTSTR pszGroupName);

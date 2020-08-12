@@ -149,7 +149,6 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 			_hTreeCtrl		= ::GetDlgItem(_hSelf, IDC_TREE_FOLDER);
 			::DestroyWindow(::GetDlgItem(_hSelf, IDC_LIST_FILE));
 			::DestroyWindow(::GetDlgItem(_hSelf, IDC_BUTTON_SPLITTER));
-			::DestroyWindow(::GetDlgItem(_hSelf, IDC_BUTTON_FILTER));
 			::DestroyWindow(::GetDlgItem(_hSelf, IDC_STATIC_FILTER));
 			::DestroyWindow(::GetDlgItem(_hSelf, IDC_COMBO_FILTER));
 
@@ -531,13 +530,23 @@ void FavesDialog::tb_cmd(UINT message)
 	}
 }
 
-void FavesDialog::InitialDialog(void)
+void FavesDialog::InitialFont(void) 
 {
+	if (_hFont)
+	{
+		::DeleteObject(_hFont);
+	}
+
+	if (_hFontUnder)
+	{
+		::DeleteObject(_hFontUnder);
+	}
+
 	/* get font for drawing */
 	HFONT defaultFont = (HFONT)::SendMessage(_hSelf, WM_GETFONT, 0, 0);
 
 	/* create copy of current font with underline */
-	LOGFONT	lf			= {0};
+	LOGFONT	lf = { 0 };
 	::GetObject(defaultFont, sizeof(LOGFONT), &lf);
 	if (_pExProp->iFontSize != 0)
 	{
@@ -545,10 +554,15 @@ void FavesDialog::InitialDialog(void)
 	}
 	_hFont = ::CreateFontIndirect(&lf);
 
-	SendMessage(_hTreeCtrl, WM_SETFONT, (WPARAM)_hFont, TRUE);
-
 	lf.lfUnderline = TRUE;
-	_hFontUnder	= ::CreateFontIndirect(&lf);
+	_hFontUnder = ::CreateFontIndirect(&lf);
+
+	SendMessage(_hTreeCtrl, WM_SETFONT, (WPARAM)_hFont, TRUE);
+}
+
+void FavesDialog::InitialDialog(void)
+{
+	InitialFont();
 
 	/* subclass tree */
 	::SetWindowLongPtr(_hTreeCtrl, GWLP_USERDATA, (LONG_PTR)this);

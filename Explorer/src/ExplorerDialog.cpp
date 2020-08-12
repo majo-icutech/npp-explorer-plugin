@@ -158,7 +158,6 @@ ExplorerDialog::ExplorerDialog(void) : DockingDlgInterface(IDD_EXPLORER_DLG)
 	_isLeftButtonDown		= FALSE;
 	_hSplitterCursorUpDown	= NULL;
 	_bStartupFinish			= FALSE;
-	_hFilterButton			= NULL;
 	_bOldRectInitilized		= FALSE;
 	_hExploreVolumeThread	= NULL;
 	_hItemExpand			= NULL;
@@ -233,16 +232,6 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 			{
 				::SendMessage(_hSelf, EXM_CHANGECOMBO, 0, 0);
 				return TRUE;
-			}
-
-			/* Only used on non NT based systems */
-			if ((HWND)lParam == _hFilterButton)
-			{
-				TCHAR	TEMP[MAX_PATH];
-
-				_ComboFilter.getText(TEMP);
-				_ComboFilter.addText(TEMP);
-				_FileList.filterFiles(TEMP);
 			}
 
 			if ((HWND)lParam == _ToolBar.getHSelf())
@@ -417,24 +406,14 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 				rcBuff = rc;
 
 				/* set position of static text */
-				if (_hFilterButton == NULL)
-				{
-					hWnd = ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
-					::GetWindowRect(hWnd, &rcWnd);
-					rc.top	     = rcBuff.bottom - 18;
-					rc.bottom    = 12;
-					rc.left     += 2;
-					rc.right     = rcWnd.right - rcWnd.left;
-					::SetWindowPos(hWnd, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
-				}
-				else
-				{
-					rc.top	     = rcBuff.bottom - 21;
-					rc.bottom    = 20;
-					rc.left     += 2;
-					rc.right     = 35;
-					::SetWindowPos(_hFilterButton, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
-				}
+				hWnd = ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
+				::GetWindowRect(hWnd, &rcWnd);
+				rc.top	     = rcBuff.bottom - 18;
+				rc.bottom    = 12;
+				rc.left     += 2;
+				rc.right     = rcWnd.right - rcWnd.left;
+				::SetWindowPos(hWnd, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
+
 				rcBuff.left = rc.right + 4;
 
 				/* set position of combo */
@@ -470,24 +449,14 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 				rcBuff = rc;
 
 				/* set position of static text */
-				if (_hFilterButton == NULL)
-				{
-					hWnd = ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
-					::GetWindowRect(hWnd, &rcWnd);
-					rc.top	     = rcBuff.bottom - 18;
-					rc.bottom    = 12;
-					rc.left     += 2;
-					rc.right     = rcWnd.right - rcWnd.left;
-					::SetWindowPos(hWnd, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
-				}
-				else
-				{
-					rc.top	     = rcBuff.bottom - 21;
-					rc.bottom    = 20;
-					rc.left     += 2;
-					rc.right     = 35;
-					::SetWindowPos(_hFilterButton, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
-				}
+				hWnd = ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
+				::GetWindowRect(hWnd, &rcWnd);
+				rc.top	     = rcBuff.bottom - 18;
+				rc.bottom    = 12;
+				rc.left     += 2;
+				rc.right     = rcWnd.right - rcWnd.left;
+				::SetWindowPos(hWnd, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
+
 				rcBuff.left = rc.right + 4;
 
 				/* set position of combo */
@@ -1312,16 +1281,15 @@ void ExplorerDialog::NotifyEvent(DWORD event)
 }
 
 
-void ExplorerDialog::InitialDialog(void)
+void ExplorerDialog::InitialFont(void)
 {
-	/* get handle of dialogs */
-	_hTreeCtrl		= ::GetDlgItem(_hSelf, IDC_TREE_FOLDER);
-	_hListCtrl		= ::GetDlgItem(_hSelf, IDC_LIST_FILE);
-	_hHeader		= ListView_GetHeader(_hListCtrl);
-	_hSplitterCtrl	= ::GetDlgItem(_hSelf, IDC_BUTTON_SPLITTER);
-	_hFilter = ::GetDlgItem(_hSelf, IDC_COMBO_FILTER);
+	if (_hFont) 
+	{
+		::DeleteObject(_hFont);
+	}
 
 	HFONT defaultFont = (HFONT)::SendMessage(_hSelf, WM_GETFONT, 0, 0);
+
 	LOGFONT	lf = { 0 };
 	::GetObject(defaultFont, sizeof(LOGFONT), &lf);
 	if (_pExProp->iFontSize != 0)
@@ -1332,13 +1300,19 @@ void ExplorerDialog::InitialDialog(void)
 
 	SendMessage(_hTreeCtrl, WM_SETFONT, (WPARAM)_hFont, TRUE);
 	SendMessage(_hListCtrl, WM_SETFONT, (WPARAM)_hFont, TRUE);
+}
 
-	if (gWinVersion < WV_NT) {
-		_hFilterButton = ::GetDlgItem(_hSelf, IDC_BUTTON_FILTER);
-		::DestroyWindow(::GetDlgItem(_hSelf, IDC_STATIC_FILTER));
-	} else {
-		::DestroyWindow(::GetDlgItem(_hSelf, IDC_BUTTON_FILTER));
-	}
+void ExplorerDialog::InitialDialog(void)
+{
+	/* get handle of dialogs */
+	_hTreeCtrl		= ::GetDlgItem(_hSelf, IDC_TREE_FOLDER);
+	_hListCtrl		= ::GetDlgItem(_hSelf, IDC_LIST_FILE);
+	_hHeader		= ListView_GetHeader(_hListCtrl);
+	_hSplitterCtrl	= ::GetDlgItem(_hSelf, IDC_BUTTON_SPLITTER);
+	_hFilter		= ::GetDlgItem(_hSelf, IDC_COMBO_FILTER);
+	_hFilterStatic	= ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
+
+	InitialFont();
 
 	/* subclass tree */
 	::SetWindowLongPtr(_hTreeCtrl, GWLP_USERDATA, (LONG_PTR)this);

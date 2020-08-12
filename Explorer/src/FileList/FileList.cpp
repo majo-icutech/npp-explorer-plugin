@@ -89,6 +89,35 @@ FileList::~FileList(void)
 {
 }
 
+void FileList::initFont()
+{
+	if (_hFont)
+	{
+		::DeleteObject(_hFont);
+	}
+
+	if (_hFontUnder)
+	{
+		::DeleteObject(_hFontUnder);
+	}
+
+	/* get font for drawing */
+	HFONT defaultFont = (HFONT)::SendMessage(_hSelf, WM_GETFONT, 0, 0);
+
+	LOGFONT	lf = { 0 };
+	::GetObject(defaultFont, sizeof(LOGFONT), &lf);
+	if (_pExProp->iFontSize != 0)
+	{
+		lf.lfHeight = -_pExProp->iFontSize;
+	}
+	_hFont = ::CreateFontIndirect(&lf);
+
+	lf.lfUnderline = TRUE;
+	_hFontUnder = ::CreateFontIndirect(&lf);
+
+	SendMessage(_hSelf, WM_SETFONT, (WPARAM)_hFont, TRUE);
+}
+
 void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 {
 	/* this is the list element */
@@ -106,14 +135,7 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 	DWORD	dwFlags	= 0;
 	_hOverThread = ::CreateThread(NULL, 0, FileOverlayThread, this, 0, &dwFlags);
 
-	/* get font for drawing */
-	_hFont		= (HFONT)::SendMessage(_hParent, WM_GETFONT, 0, 0);
-
-	/* create copy of current font with underline */
-	LOGFONT	lf			= {0};
-	::GetObject(_hFont, sizeof(LOGFONT), &lf);
-	lf.lfUnderline		= TRUE;
-	_hFontUnder	= ::CreateFontIndirect(&lf);
+	initFont();
 
 	/* load sort bitmaps */
 	if (gWinVersion < WV_XP)
@@ -260,6 +282,7 @@ LRESULT FileList::runListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			}
 
 			ImageList_Destroy(_hImlParent);
+			::DeleteObject(_hFont);
 			::DeleteObject(_hFontUnder);
 
 			if (_hSemaphore) {
