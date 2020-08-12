@@ -51,6 +51,7 @@ CONST TCHAR Faves[]				= _T("Faves");
 
 /* section Explorer */
 CONST TCHAR LastPath[]			= _T("LastPath");
+CONST TCHAR FontSize[]			= _T("FontSize");
 CONST TCHAR SplitterPos[]		= _T("SplitterPos");
 CONST TCHAR SplitterPosHor[]	= _T("SplitterPosHor");
 CONST TCHAR SortAsc[]			= _T("SortAsc");
@@ -359,6 +360,7 @@ void loadSettings(void)
 	}
 
 	::GetPrivateProfileString(Explorer, LastPath, _T("C:\\"), exProp.szCurrentPath, MAX_PATH, iniFilePath);
+	exProp.iFontSize				= ::GetPrivateProfileInt(Explorer, FontSize, 0, iniFilePath);
 	exProp.iSplitterPos				= ::GetPrivateProfileInt(Explorer, SplitterPos, 120, iniFilePath);
 	exProp.iSplitterPosHorizontal	= ::GetPrivateProfileInt(Explorer, SplitterPosHor, 200, iniFilePath);
 	exProp.bAscending				= ::GetPrivateProfileInt(Explorer, SortAsc, TRUE, iniFilePath);
@@ -407,6 +409,7 @@ void saveSettings(void)
 	TCHAR	temp[256];
 
 	::WritePrivateProfileString(Explorer, LastPath, exProp.szCurrentPath, iniFilePath);
+	::WritePrivateProfileString(Explorer, FontSize, _itot(exProp.iFontSize, temp, 10), iniFilePath);
 	::WritePrivateProfileString(Explorer, SplitterPos, _itot(exProp.iSplitterPos, temp, 10), iniFilePath);
 	::WritePrivateProfileString(Explorer, SplitterPosHor, _itot(exProp.iSplitterPosHorizontal, temp, 10), iniFilePath);
 	::WritePrivateProfileString(Explorer, SortAsc, _itot(exProp.bAscending, temp, 10), iniFilePath);

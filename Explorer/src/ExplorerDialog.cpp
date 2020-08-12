@@ -565,6 +565,8 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 			if (_hDefaultSplitterProc != NULL)
 				::SetWindowLongPtr(_hSplitterCtrl, GWLP_WNDPROC, (LONG_PTR)_hDefaultSplitterProc);
 
+			::DeleteObject(_hFont);
+
 			break;
 		}
 		case EXM_CHANGECOMBO:
@@ -1318,6 +1320,18 @@ void ExplorerDialog::InitialDialog(void)
 	_hHeader		= ListView_GetHeader(_hListCtrl);
 	_hSplitterCtrl	= ::GetDlgItem(_hSelf, IDC_BUTTON_SPLITTER);
 	_hFilter = ::GetDlgItem(_hSelf, IDC_COMBO_FILTER);
+
+	HFONT defaultFont = (HFONT)::SendMessage(_hSelf, WM_GETFONT, 0, 0);
+	LOGFONT	lf = { 0 };
+	::GetObject(defaultFont, sizeof(LOGFONT), &lf);
+	if (_pExProp->iFontSize != 0)
+	{
+		lf.lfHeight = -_pExProp->iFontSize;
+	}
+	_hFont = ::CreateFontIndirect(&lf);
+
+	SendMessage(_hTreeCtrl, WM_SETFONT, (WPARAM)_hFont, TRUE);
+	SendMessage(_hListCtrl, WM_SETFONT, (WPARAM)_hFont, TRUE);
 
 	if (gWinVersion < WV_NT) {
 		_hFilterButton = ::GetDlgItem(_hSelf, IDC_BUTTON_FILTER);

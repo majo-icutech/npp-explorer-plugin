@@ -139,6 +139,7 @@ private:
 	BOOL					_bStartupFinish;
 	HANDLE					_hExploreVolumeThread;
 	HTREEITEM				_hItemExpand;
+	HFONT					_hFont;
 
 	/* control process */
 	WNDPROC					_hDefaultTreeProc;

@@ -397,6 +397,7 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 		}
 		case WM_DESTROY:
 		{
+			::DeleteObject(_hFont);
 			::DeleteObject(_hFontUnder);
 
 			SaveSettings();
@@ -533,12 +534,20 @@ void FavesDialog::tb_cmd(UINT message)
 void FavesDialog::InitialDialog(void)
 {
 	/* get font for drawing */
-	_hFont		= (HFONT)::SendMessage(_hSelf, WM_GETFONT, 0, 0);
+	HFONT defaultFont = (HFONT)::SendMessage(_hSelf, WM_GETFONT, 0, 0);
 
 	/* create copy of current font with underline */
 	LOGFONT	lf			= {0};
-	::GetObject(_hFont, sizeof(LOGFONT), &lf);
-	lf.lfUnderline		= TRUE;
+	::GetObject(defaultFont, sizeof(LOGFONT), &lf);
+	if (_pExProp->iFontSize != 0)
+	{
+		lf.lfHeight = -_pExProp->iFontSize;
+	}
+	_hFont = ::CreateFontIndirect(&lf);
+
+	SendMessage(_hTreeCtrl, WM_SETFONT, (WPARAM)_hFont, TRUE);
+
+	lf.lfUnderline = TRUE;
 	_hFontUnder	= ::CreateFontIndirect(&lf);
 
 	/* subclass tree */

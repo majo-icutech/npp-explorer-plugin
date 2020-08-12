@@ -201,6 +201,7 @@ typedef struct {
 typedef struct {
 	/* pointer to global current path */
 	TCHAR			szCurrentPath[MAX_PATH];
+	INT				iFontSize;
 	INT				iSplitterPos;
 	INT				iSplitterPosHorizontal;
 	BOOL			bAscending;
