@@ -42,6 +42,8 @@ DWORD WINAPI UpdateThread(LPVOID lpParam)
     DWORD			dwWaitResult    = EID_INIT;
 	ExplorerDialog*	dlg             = (ExplorerDialog*)lpParam;
 
+	CoInitialize(NULL);
+
 	dlg->NotifyEvent(dwWaitResult);
 
 	while (bRun)
@@ -57,6 +59,9 @@ DWORD WINAPI UpdateThread(LPVOID lpParam)
 			dlg->NotifyEvent(dwWaitResult);
 		}
 	}
+
+	CoUninitialize();
+
 	return 0;
 }
 

@@ -35,11 +35,7 @@ public:
 	~TreeHelper() {
 	};
 
-	void UpdateOverlayIcon(void);
-
 protected:
-
-	void UseOverlayThreading(void);
 
 	virtual void GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName) = 0;
 	void DrawChildren(HTREEITEM parentItem);
