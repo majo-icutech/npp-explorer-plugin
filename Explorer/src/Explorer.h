@@ -139,9 +139,6 @@ typedef enum {
 
 /********************************************************/
 
-#define TITLETIP_CLASSNAME "MyToolTip"
-
-
 typedef enum {
 	DEVT_DRIVE,
 	DEVT_DIRECTORY,
@@ -153,12 +150,11 @@ typedef enum {
 	SFMT_BYTES,
 	SFMT_KBYTE,
 	SFMT_DYNAMIC,
-	SFMT_DYNAMIC_EX,
-	SFMT_MAX
+	SFMT_DYNAMIC_EX
 } eSizeFmt;
 
 
-const LPTSTR pszSizeFmt[18] = {
+const LPTSTR pszSizeFmt[] = {
 	_T("Bytes"),
 	_T("kBytes"),
 	_T("Dynamic x b/k/M"),
@@ -167,13 +163,32 @@ const LPTSTR pszSizeFmt[18] = {
 
 typedef enum {
 	DFMT_ENG,
-	DFMT_GER,
-	DFMT_MAX
+	DFMT_GER
 } eDateFmt;
 
-const LPTSTR pszDateFmt[12] = {
+const LPTSTR pszDateFmt[] = {
 	_T("Y/M/D HH:MM"),
 	_T("D.M.Y HH:MM")
+};
+
+const LPTSTR pszFontSize[] = {
+	_T("Default"),
+	_T("8"),
+	_T("9"),
+	_T("10"),
+	_T("12"),
+	_T("14"),
+	_T("16"),
+	_T("18"),
+	_T("20"),
+	_T("22"),
+	_T("24"),
+	_T("26"),
+	_T("28"),
+	_T("30"),
+	_T("32"),
+	_T("34"),
+	_T("36")
 };
 
 typedef struct {
@@ -201,7 +216,7 @@ typedef struct {
 typedef struct {
 	/* pointer to global current path */
 	TCHAR			szCurrentPath[MAX_PATH];
-	INT				iFontSize;
+	UINT			iFontSize;
 	INT				iSplitterPos;
 	INT				iSplitterPosHorizontal;
 	BOOL			bAscending;

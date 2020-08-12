@@ -22,10 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "OptionDialog.h"
 #include "Explorer.h"
 #include <Commctrl.h>
-#pragma warning(push)
-#pragma warning(disable: 4091)
 #include <shlobj.h>
-#pragma warning(pop)
 
 
 // Set a call back with the handle after init to set the path.
@@ -53,13 +50,17 @@ INT_PTR CALLBACK OptionDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lPar
 		{
 			goToCenter();
 
-			for (int i = 0; i < SFMT_MAX; i++)
+			for (LPTSTR strSizeFmt : pszSizeFmt)
 			{
-				::SendDlgItemMessage(_hSelf, IDC_COMBO_SIZE_FORMAT, CB_ADDSTRING, 0, (LPARAM)pszSizeFmt[i]);
+				::SendDlgItemMessage(_hSelf, IDC_COMBO_SIZE_FORMAT, CB_ADDSTRING, 0, (LPARAM)strSizeFmt);
 			}
-			for (int i = 0; i < DFMT_MAX; i++)
+			for (LPTSTR strDateFmt : pszDateFmt)
 			{
-				::SendDlgItemMessage(_hSelf, IDC_COMBO_DATE_FORMAT, CB_ADDSTRING, 0, (LPARAM)pszDateFmt[i]);
+				::SendDlgItemMessage(_hSelf, IDC_COMBO_DATE_FORMAT, CB_ADDSTRING, 0, (LPARAM)strDateFmt);
+			}
+			for (LPTSTR strFontSize: pszFontSize)
+			{
+				::SendDlgItemMessage(_hSelf, IDC_COMBO_FONT_SIZE, CB_ADDSTRING, 0, (LPARAM)strFontSize);
 			}
 			::SendDlgItemMessage(_hSelf, IDC_EDIT_TIMEOUT, EM_LIMITTEXT, 5, 0);
 			
@@ -198,11 +199,20 @@ void OptionDlg::SetParams(void)
 	::SendDlgItemMessage(_hSelf, IDC_CHECK_HIDDEN, BM_SETCHECK, _pProp->bShowHidden?BST_CHECKED:BST_UNCHECKED, 0);
 	::SendDlgItemMessage(_hSelf, IDC_CHECK_USEICON, BM_SETCHECK, _pProp->bUseSystemIcons?BST_CHECKED:BST_UNCHECKED, 0);
 
+	TCHAR temp[MAX_PATH];
+	if (_pProp->iFontSize > 0) 
+	{
+		::SetDlgItemInt(_hSelf, IDC_COMBO_FONT_SIZE, _pProp->iFontSize, FALSE);
+	}
+	else 
+	{
+		::SendDlgItemMessage(_hSelf, IDC_COMBO_FONT_SIZE, CB_SETCURSEL, 0, 0);
+	}
+
 	::SetDlgItemText(_hSelf, IDC_EDIT_EXECNAME, _pProp->nppExecProp.szAppName);
 	::SetDlgItemText(_hSelf, IDC_EDIT_SCRIPTPATH, _pProp->nppExecProp.szScriptPath);
 
-	TCHAR	TEMP[6];
-	::SetDlgItemText(_hSelf, IDC_EDIT_TIMEOUT, _itot(_pProp->uTimeout, TEMP, 10));
+	::SetDlgItemInt(_hSelf, IDC_EDIT_TIMEOUT, _pProp->uTimeout, FALSE);
 }
 
 
@@ -244,11 +254,14 @@ BOOL OptionDlg::GetParams(void)
 		_pProp->bUseSystemIcons = FALSE;
 
 	TCHAR	TEMP[MAX_PATH];
-	::GetDlgItemText(_hSelf, IDC_EDIT_TIMEOUT, TEMP, 6);
+	::GetDlgItemText(_hSelf, IDC_EDIT_TIMEOUT, TEMP, MAX_PATH);
 	_pProp->uTimeout = (UINT)_ttoi(TEMP);
 
 	::GetDlgItemText(_hSelf, IDC_EDIT_EXECNAME, _pProp->nppExecProp.szAppName, MAX_PATH);
 	::GetDlgItemText(_hSelf, IDC_EDIT_SCRIPTPATH, _pProp->nppExecProp.szScriptPath, MAX_PATH);
+
+	::GetDlgItemText(_hSelf, IDC_COMBO_FONT_SIZE, TEMP, MAX_PATH);
+	_pProp->iFontSize = (UINT)_ttoi(TEMP);
 
 	return bRet;
 }
