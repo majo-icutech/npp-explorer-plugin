@@ -38,8 +38,6 @@ extern enum winVer gWinVersion;
 
 /************* some global defines ********************/
 
-#define DND_SCR_TIMEOUT		200
-
 #define SHORTCUT_ALL		0x01
 #define SHORTCUT_DELETE		0x04
 #define SHORTCUT_COPY		0x03
@@ -282,10 +280,6 @@ void openHelpDlg(void);
 
 LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-
-#define	ALLOW_PARENT_SEL	1
-
-void FileListUpdate(void);
 BOOL VolumeNameExists(LPTSTR rootDrive, LPTSTR volumeName);
 bool IsValidFileName(LPTSTR pszFileName);
 bool IsValidFolder(const WIN32_FIND_DATA & Find);
