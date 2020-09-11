@@ -52,7 +52,7 @@ public:
     virtual void destroy() {};
 
 	void setTreeElements(PELEM pElem, INT iUserImagePos, BOOL bWithLink = FALSE);
-	LPCTSTR getGroupName(void);
+	vector<wstring> getGroupPath(void);
 
 protected :
 	INT_PTR CALLBACK run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam) override;
@@ -72,7 +72,7 @@ private:
 	BOOL			_seeDetails;
 	PELEM			_pElem;
 	INT				_iUImgPos;
-	wstring			_strGroupName;
+	vector<wstring> _groupPath;
 	TCHAR			_szDetails[20];
 };
 

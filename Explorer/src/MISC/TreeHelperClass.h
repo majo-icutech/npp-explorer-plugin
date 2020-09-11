@@ -37,7 +37,8 @@ public:
 
 protected:
 
-	virtual void GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName) = 0;
+	std::vector<std::wstring> GetItemPathFromRoot(HTREEITEM currentItem);
+	void GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName);
 	void DrawChildren(HTREEITEM parentItem);
 	void UpdateChildren(LPTSTR pszParentPath, HTREEITEM pCurrentItem, BOOL doRecursive = TRUE );
 	HTREEITEM InsertChildFolder(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter = TVI_LAST, BOOL bChildrenTest = TRUE);

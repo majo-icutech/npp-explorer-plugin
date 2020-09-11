@@ -116,12 +116,6 @@ void FavesDialog::doDialog(bool willBeShown)
 }
 
 
-void FavesDialog::SaveSession(void)
-{
-	AddSaveSession(NULL, TRUE);
-}
-
-
 void FavesDialog::NotifyNewFile(void)
 {
 	if (isCreated() && isVisible())
@@ -589,69 +583,49 @@ void FavesDialog::InitialDialog(void)
 }
 
 
-HTREEITEM FavesDialog::GetTreeItem(LPCTSTR pszGroupName)
+HTREEITEM FavesDialog::GetTreeItem(vector<wstring> groupPath)
 {
 	if (isCreated())
 	{
-		HTREEITEM	hItem		= TVI_ROOT;
-		LPTSTR		ptr			= NULL;
+		HTREEITEM	hItem = TVI_ROOT;
 		TCHAR		pszName[MAX_PATH];
-		TCHAR		TEMP[MAX_PATH];
 
-		/* copy the group name */
-		_tcscpy(TEMP, pszGroupName);
-
-		ptr = _tcstok(TEMP, _T(" "));
-
-		/* no need to compare if tree item is NULL, it will never happen */
-		while (ptr != NULL)
+		for (wstring currentPathItem : groupPath)
 		{
-			/* get child item */
+			// get child item
 			hItem = TreeView_GetChild(_hTreeCtrl, hItem);
 			GetItemText(hItem, pszName, MAX_PATH);
 
-			while (_tcscmp(ptr, pszName) != 0)
+			while (_tcscmp(pszName, currentPathItem.c_str()))
 			{
 				hItem = TreeView_GetNextItem(_hTreeCtrl, hItem, TVGN_NEXT);
 				GetItemText(hItem, pszName, MAX_PATH);
 			}
-			/* test next element */
-			ptr = _tcstok(NULL, _T(" "));
 		}
+
 		return hItem;
 	}
-	
-	return NULL;
+
+	return nullptr;
 }
 
 
-PELEM FavesDialog::GetElementPointer(LPCTSTR pszGroupName)
+PELEM FavesDialog::GetElementPointer(vector<wstring> groupPath)
 {
-	LPTSTR			ptr			= NULL;
-	ELEM_ITR		elem_itr	= _vDB.begin();
-	ELEM_ITR		elem_end	= _vDB.end();
-	TCHAR			TEMP[MAX_PATH];
+	ELEM_ITR		elem_itr = _vDB.begin();
+	ELEM_ITR		elem_end = _vDB.end();
 
-	/* copy the group name */
-	_tcscpy(TEMP, pszGroupName);
-
-	ptr = _tcstok(TEMP, _T(" "));
-
-	/* find element */
-	while (ptr != NULL)
+	for (size_t i = 0; i < groupPath.size(); i++)
 	{
-		for (; elem_itr != elem_end; elem_itr++)
+		for (; elem_itr != elem_end; ++elem_itr)
 		{
-			if (_tcscmp(elem_itr->pszName, ptr) == 0)
+			if (_tcscmp(elem_itr->pszName, groupPath[i].c_str()) == 0)
 			{
 				break;
 			}
 		}
 
-		/* test next element */
-		ptr = _tcstok(NULL, _T(" "));
-
-		if (ptr != NULL)
+		if (i < groupPath.size() - 1)
 		{
 			elem_end = elem_itr->vElements.end();
 			elem_itr = elem_itr->vElements.begin();
@@ -804,8 +778,8 @@ void FavesDialog::AddToFavorties(BOOL isFolder, LPTSTR szLink)
 		if (dlgProp.doDialog(pszName, pszLink, pszDesc, MapPropDlg(root)) == TRUE)
 		{
 			/* get selected item */
-			LPCTSTR		pszGroupName = dlgProp.getGroupName();
-			hItem = GetTreeItem(pszGroupName);
+			vector<wstring> groupPath = dlgProp.getGroupPath();			
+			hItem = GetTreeItem(groupPath);
 
 			/* test if name not exist and link exist */
 			if (DoesNameNotExist(hItem, NULL, pszName) == TRUE)
@@ -823,7 +797,7 @@ void FavesDialog::AddToFavorties(BOOL isFolder, LPTSTR szLink)
 				_tcscpy(element.pszLink, pszLink);
 
 				/* push element back */
-				PELEM	pElem	= GetElementPointer(pszGroupName);
+				PELEM	pElem	= GetElementPointer(groupPath);
 				pElem->vElements.push_back(element);
 			}
 		}
@@ -898,11 +872,11 @@ void FavesDialog::AddSaveSession(HTREEITEM hItem, BOOL bSave)
 			if (hItem == NULL)
 			{
 				/* get group name */
-				LPCTSTR		pszGroupName = dlgProp.getGroupName();
-				hParentItem = GetTreeItem(pszGroupName);
+				vector<wstring> groupPath = dlgProp.getGroupPath();
+				hItem = GetTreeItem(groupPath);
 
 				/* get pointer by name */
-				pElem = GetElementPointer(pszGroupName);
+				pElem = GetElementPointer(groupPath);
 
 				if (pElem->uParam & FAVES_PARAM_LINK)
 				{

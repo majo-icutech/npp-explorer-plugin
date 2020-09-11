@@ -440,3 +440,47 @@ BOOL TreeHelper::IsItemExpanded(HTREEITEM hItem)
 	return (BOOL)(TreeView_GetItemState(_hTreeCtrl, hItem, TVIS_EXPANDED) & TVIS_EXPANDED);
 }
 
+std::vector<std::wstring> TreeHelper::GetItemPathFromRoot(HTREEITEM currentItem)
+{
+	std::vector<std::wstring> result;
+	
+	if (currentItem != TVI_ROOT)
+	{
+		TCHAR	TEMP[MAX_PATH];
+
+		while (currentItem != nullptr)
+		{
+			GetItemText(currentItem, TEMP, MAX_PATH);
+			result.emplace_back(std::wstring(TEMP));
+			currentItem = TreeView_GetNextItem(_hTreeCtrl, currentItem, TVGN_PARENT);
+		}
+	}
+
+	std::reverse(std::begin(result), std::end(result));
+
+	return result;
+}
+
+void TreeHelper::GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName)
+{
+	vector<wstring> path = GetItemPathFromRoot(currentItem);
+
+	folderPathName[0] = '\0';
+
+	for (size_t i = 0; i < path.size(); i++)
+	{
+		if (i == 0)
+		{
+			_stprintf(folderPathName, _T("%c:"), path[i][0]);
+		}
+		else
+		{
+			_stprintf(folderPathName, _T("%s\\%s"), folderPathName, path[i].c_str());
+		}
+	}
+	if (folderPathName[0] != '\0')
+	{
+		PathRemoveBackslash(folderPathName);
+		_stprintf(folderPathName, _T("%s\\"), folderPathName);
+	}
+}

@@ -69,7 +69,6 @@ public:
    	void doDialog(bool willBeShown = true);
 
 	void AddToFavorties(BOOL isFolder, LPTSTR szLink);
-	void SaveSession(void);
 	void NotifyNewFile(void);
 
 	void UpdateColors();
@@ -83,8 +82,8 @@ protected:
 	void InitialDialog(void);
 	void InitialFont(void);
 
-	HTREEITEM GetTreeItem(LPCTSTR pszGroupName);
-	PELEM GetElementPointer(LPCTSTR pszGroupName);
+	HTREEITEM GetTreeItem(vector<wstring> groupPath);
+	PELEM GetElementPointer(vector<wstring> groupPath);
 	void CopyItem(HTREEITEM hItem);
 	void CutItem(HTREEITEM hItem);
 	void PasteItem(HTREEITEM hItem);
@@ -126,10 +125,6 @@ protected:
 			default: return LINK_DLG_NONE;
 		}
 	};
-
-
-public:
-	void GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName) {};
 
 protected:
 
