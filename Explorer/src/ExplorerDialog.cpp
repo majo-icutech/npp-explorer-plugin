@@ -1604,7 +1604,7 @@ void ExplorerDialog::UpdateDevices(void)
 	TCHAR			TEMP[MAX_PATH]	= {0};
 	TCHAR			volumeName[MAX_PATH];
 
-	for (int i = 1; i < 32; i++)
+	for (int i = 0; i < 32; i++)
 	{
 		drivePathName[0] = 'A' + i;
 
