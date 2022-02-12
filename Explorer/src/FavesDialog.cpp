@@ -420,47 +420,48 @@ LRESULT FavesDialog::runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM 
 {
 	switch (Message)
 	{
-		case WM_LBUTTONDBLCLK:
+	case WM_GETDLGCODE:
+	{
+		return DLGC_WANTALLKEYS | ::CallWindowProc(_hDefaultTreeProc, hwnd, Message, wParam, lParam);
+	}
+	case WM_KEYDOWN:
+	case WM_LBUTTONDBLCLK:
+	{
+		if (Message == WM_KEYDOWN && wParam != VK_RETURN)
 		{
-			TVHITTESTINFO	hti = {0};
-
-			hti.pt.x = GET_X_LPARAM(lParam);
-			hti.pt.y = GET_Y_LPARAM(lParam);
-
-			HTREEITEM hItem = TreeView_HitTest(_hTreeCtrl, &hti);
-
-			if (hItem != NULL)
-			{
-				PELEM	pElem = (PELEM)GetParam(hItem);
-
-				if (pElem != NULL)
-				{
-					/* open link only when double click on bitmap or label */
-					if (hti.flags & TVHT_ONITEM)
-					{
-						_peOpenLink = pElem;
-						::PostMessage(_hSelf, EXM_OPENLINK, 0, 0);
-					}
-
-					if ((!(pElem->uParam & FAVES_PARAM_MAIN)) &&
-						((pElem->uParam & FAVES_PARAM) == FAVES_SESSIONS))
-					{
-						return TRUE;
-					}
-				}
-				else
-				{
-					/* session file will be opened */
-					TCHAR	TEMP[MAX_PATH];
-					
-					GetItemText(hItem, TEMP, MAX_PATH);
-					::SendMessage(_hParent, NPPM_DOOPEN, 0, (LPARAM)TEMP);
-				}
-			}
 			break;
 		}
-		default:
-			break;
+
+		HTREEITEM hItem = TreeView_GetSelection(_hTreeCtrl);
+
+		if (hItem != NULL)
+		{
+			PELEM	pElem = (PELEM)GetParam(hItem);
+
+			if (pElem != NULL)
+			{
+				_peOpenLink = pElem;
+				::PostMessage(_hSelf, EXM_OPENLINK, 0, 0);
+
+				if ((!(pElem->uParam & FAVES_PARAM_MAIN)) &&
+					((pElem->uParam & FAVES_PARAM) == FAVES_SESSIONS))
+				{
+					return TRUE;
+				}
+			}
+			else
+			{
+				/* session file will be opened */
+				TCHAR	TEMP[MAX_PATH];
+
+				GetItemText(hItem, TEMP, MAX_PATH);
+				::SendMessage(_hParent, NPPM_DOOPEN, 0, (LPARAM)TEMP);
+			}
+		}
+		break;
+	}
+	default:
+		break;
 	}
 	
 	return ::CallWindowProc(_hDefaultTreeProc, hwnd, Message, wParam, lParam);
