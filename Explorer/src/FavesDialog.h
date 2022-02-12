@@ -64,6 +64,7 @@ public:
 	{
 		/* save settings and destroy the resources */
 		SaveSettings();
+		ReleaseResources();
 	};
 
    	void doDialog(bool willBeShown = true);
@@ -113,6 +114,7 @@ protected:
 	void ReadElementTreeRecursive(ELEM_ITR elem_itr, LPTSTR* ptr);
 
 	void SaveSettings(void);
+	void ReleaseResources(void);
 	void SaveElementTreeRecursive(PELEM pElem, HANDLE hFile);
 
 	void ExpandElementsRecursive(HTREEITEM hItem);

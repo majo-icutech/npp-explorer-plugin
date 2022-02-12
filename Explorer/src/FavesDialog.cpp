@@ -392,8 +392,9 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 		{
 			::DeleteObject(_hFont);
 			::DeleteObject(_hFontUnder);
-
+			
 			SaveSettings();
+			ReleaseResources();
 			::DestroyIcon(_data.hIconTab);
 
 			_ToolBar.destroy();
@@ -714,6 +715,8 @@ void FavesDialog::PasteItem(HTREEITEM hItem)
 			TreeView_Expand(_hTreeCtrl, hItem, TVM_EXPAND | TVE_COLLAPSERESET);
 		}
 
+		SaveSettings();
+
 		_hTreeCutCopy = NULL;
 	}
 	else
@@ -820,6 +823,8 @@ void FavesDialog::AddToFavorties(BOOL isFolder, LPTSTR szLink)
 
 		/* expand item */
 		TreeView_Expand(_hTreeCtrl, hItem, TVM_EXPAND | TVE_COLLAPSERESET);
+
+		SaveSettings();
 	}
 
 	delete [] pszName;
@@ -952,6 +957,8 @@ void FavesDialog::AddSaveSession(HTREEITEM hItem, BOOL bSave)
 			UpdateLink(hParentItem);
 			TreeView_Expand(_hTreeCtrl, hParentItem, TVM_EXPAND | TVE_COLLAPSERESET);
 		}
+
+		SaveSettings();
 	}
 
 	delete [] pszName;
@@ -1020,6 +1027,8 @@ void FavesDialog::NewItem(HTREEITEM hItem)
 		UpdateLink(hItem);
 
 		TreeView_Expand(_hTreeCtrl, hItem, TVM_EXPAND | TVE_COLLAPSERESET);
+
+		SaveSettings();
 	}
 
 
@@ -1116,6 +1125,8 @@ void FavesDialog::EditItem(HTREEITEM hItem)
 		if (isOk == TRUE)
 		{
 			UpdateLink(hParentItem);
+
+			SaveSettings();
 		}
 
 		delete [] pszName;
@@ -1147,6 +1158,8 @@ void FavesDialog::DeleteItem(HTREEITEM hItem)
 			UpdateLink(TreeView_GetParent(_hTreeCtrl, hItemParent));
 		}
 		UpdateLink(hItemParent);
+
+		SaveSettings();
 	}
 }
 
@@ -1272,6 +1285,8 @@ void FavesDialog::OpenContext(HTREEITEM hItem, POINT pt)
 								}
 								UpdateLink(hItem);
 								TreeView_Expand(_hTreeCtrl, hItem, TVM_EXPAND | TVE_COLLAPSERESET);
+
+								SaveSettings();
 							}
 						}
 						else
@@ -2039,9 +2054,6 @@ void FavesDialog::SaveSettings(void)
 			::WriteFile(hFile, temp, _tcslen(temp) * sizeof(TCHAR), &hasWritten, NULL);
 			SaveElementTreeRecursive(pElem, hFile);
 
-			/* delete tree */
-			DeleteRecursive(pElem);
-
 			hItem = TreeView_GetNextItem(_hTreeCtrl, hItem, TVGN_NEXT);
 		}
 
@@ -2053,6 +2065,17 @@ void FavesDialog::SaveSettings(void)
 	}
 
 	delete [] saveFilePath;
+}
+
+void FavesDialog::ReleaseResources(void)
+{
+	HTREEITEM	hItem = TreeView_GetNextItem(_hTreeCtrl, TVI_ROOT, TVGN_CHILD);
+	for (int i = 0; i < FAVES_ITEM_MAX; i++)
+	{
+		PELEM pElem = (PELEM)GetParam(hItem);
+		DeleteRecursive(pElem);
+		hItem = TreeView_GetNextItem(_hTreeCtrl, hItem, TVGN_NEXT);
+	}
 }
 
 
