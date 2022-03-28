@@ -70,6 +70,7 @@ CONST TCHAR TimeOut[]			= _T("TimeOut");
 CONST TCHAR UseSystemIcons[]	= _T("UseSystemIcons");
 CONST TCHAR NppExecAppName[]	= _T("NppExecAppName");
 CONST TCHAR NppExecScriptPath[]	= _T("NppExecScriptPath");
+CONST TCHAR UseFullTree[]		= _T("UseFullTree");
 
 
 /* global values */
@@ -383,6 +384,7 @@ void loadSettings(void)
 	exProp.fmtDate					= (eDateFmt)::GetPrivateProfileInt(Explorer, DateFormat, DFMT_ENG, iniFilePath);
 	exProp.uTimeout					= ::GetPrivateProfileInt(Explorer, TimeOut, 1000, iniFilePath);
 	exProp.bUseSystemIcons			= ::GetPrivateProfileInt(Explorer, UseSystemIcons, TRUE, iniFilePath);
+	exProp.bUseFullTree				= ::GetPrivateProfileInt(Explorer, UseFullTree, TRUE, iniFilePath);
 	::GetPrivateProfileString(Explorer, NppExecAppName, _T("NppExec.dll"), exProp.nppExecProp.szAppName, MAX_PATH, iniFilePath);
 	::GetPrivateProfileString(Explorer, NppExecScriptPath, configPath, exProp.nppExecProp.szScriptPath, MAX_PATH, iniFilePath);
 
@@ -435,6 +437,7 @@ void saveSettings(void)
 	::WritePrivateProfileString(Explorer, UseSystemIcons, _itot(exProp.bUseSystemIcons, temp, 10), iniFilePath);
 	::WritePrivateProfileString(Explorer, NppExecAppName, exProp.nppExecProp.szAppName, iniFilePath);
 	::WritePrivateProfileString(Explorer, NppExecScriptPath, exProp.nppExecProp.szScriptPath, iniFilePath);
+	::WritePrivateProfileString(Explorer, UseFullTree, _itot(exProp.bUseFullTree, temp, 10), iniFilePath);
 
 	for (INT i = exProp.vStrFilterHistory.size() - 1; i >= 0 ; i--)
 	{
@@ -582,6 +585,18 @@ bool IsValidFileName(LPTSTR pszFileName)
 	return false;
 }
 
+bool IsValid(const WIN32_FIND_DATA & Find)
+{
+	if (
+		(!(Find.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) || exProp.bShowHidden) &&
+		 (_tcscmp(Find.cFileName, _T(".")) != 0) && 
+		 (_tcscmp(Find.cFileName, _T("..")) != 0) &&
+		 (Find.cFileName[0] != '?'))
+		return true;
+
+	return false;
+}
+
 bool IsValidFolder(const WIN32_FIND_DATA & Find)
 {
 	if ((Find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && 
@@ -614,7 +629,7 @@ bool IsValidFile(const WIN32_FIND_DATA & Find)
 	return false;
 }
 
-BOOL HaveChildren(LPTSTR parentFolderPathName)
+BOOL HaveChildren(LPTSTR parentFolderPathName, bool useFullTree)
 {
 	WIN32_FIND_DATA		Find		= {0};
 	HANDLE				hFind		= NULL;
@@ -632,7 +647,7 @@ BOOL HaveChildren(LPTSTR parentFolderPathName)
 
 	do
 	{
-		if (IsValidFolder(Find) == TRUE)
+		if ((useFullTree && IsValid(Find) == TRUE) || (!useFullTree && IsValidFolder(Find) == TRUE))
 		{
 			bFound = FALSE;
 			bRet = TRUE;

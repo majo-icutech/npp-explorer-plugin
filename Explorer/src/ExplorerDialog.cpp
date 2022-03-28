@@ -269,6 +269,33 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 						}
 						return TRUE;
 					}
+					case NM_DBLCLK:
+					{
+						ContextMenu		cm;
+						POINT			pt = { 0 };
+						TVHITTESTINFO	ht = { 0 };
+						DWORD			dwpos = ::GetMessagePos();
+						HTREEITEM		hItem = NULL;
+	
+						pt.x = GET_X_LPARAM(dwpos);
+						pt.y = GET_Y_LPARAM(dwpos);
+	
+						ht.pt = pt;
+						::ScreenToClient(_hTreeCtrl, &ht.pt);
+	
+						hItem = TreeView_HitTest(_hTreeCtrl, &ht);
+						if (hItem != NULL)
+						{
+							TCHAR	strPathName[MAX_PATH];
+	
+							GetFolderPathName(hItem, strPathName, false);
+							if (::PathIsDirectory(strPathName) == FALSE) {
+								::SendMessage(_nppData._nppHandle, NPPM_DOOPEN, 0, (LPARAM)strPathName);
+							}
+	
+						}
+						return TRUE;
+					}
 					case TVN_SELCHANGED:
 					{
 						if (_isSelNotifyEnable == TRUE)
@@ -298,7 +325,7 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 						if (((LPNMTVKEYDOWN)lParam)->wVKey == VK_RIGHT)
 						{
 							HTREEITEM	hItem = TreeView_GetSelection(_hTreeCtrl);
-							DrawChildren(hItem);
+							DrawChildren(hItem, (_pExProp->bUseFullTree ? true : false));
 						}
 						return TRUE;
 					}
@@ -785,7 +812,7 @@ LRESULT ExplorerDialog::runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPAR
 					/* toggle item on return */
 					HTREEITEM	hItem = TreeView_GetSelection(_hTreeCtrl);
 					if (TreeView_GetChild(_hTreeCtrl, hItem) == NULL)
-						DrawChildren(hItem);
+						DrawChildren(hItem, (_pExProp->bUseFullTree ? true : false));
 					TreeView_Expand(_hTreeCtrl, hItem, TVE_TOGGLE);
 					return TRUE;
 				}
@@ -1290,12 +1317,12 @@ void ExplorerDialog::NotifyEvent(DWORD event)
 			if (hParentItem != NULL)
 			{
 				GetFolderPathName(hParentItem, strPathName);
-				UpdateChildren(strPathName, hParentItem, FALSE);
+				UpdateChildren(strPathName, hParentItem, FALSE, (_pExProp->bUseFullTree ? true : false));
 			}
 			if (hItem != NULL)
 			{
 				GetFolderPathName(hItem, strPathName);
-				UpdateChildren(strPathName, hItem, FALSE);
+				UpdateChildren(strPathName, hItem, FALSE, (_pExProp->bUseFullTree ? true : false));
 				UpdatePath();
 			}
 			break;
@@ -1303,7 +1330,7 @@ void ExplorerDialog::NotifyEvent(DWORD event)
 		case EID_EXPAND_ITEM:
 		{
 			if (!TreeView_GetChild(_hTreeCtrl, _hItemExpand)) {
-				DrawChildren(_hItemExpand);
+				DrawChildren(_hItemExpand, (_pExProp->bUseFullTree?true:false));
 			} else {
 				/* set cursor back before tree is updated for faster access */
 				::SetClassLongPtr(_hSelf, GCLP_HCURSOR, oldCur);
@@ -1314,7 +1341,7 @@ void ExplorerDialog::NotifyEvent(DWORD event)
 				TCHAR	strPathName[MAX_PATH];
 				GetFolderPathName(_hItemExpand, strPathName);
 				strPathName[_tcslen(strPathName)-1] = '\0';
-				UpdateChildren(strPathName, _hItemExpand);
+				UpdateChildren(strPathName, _hItemExpand, false, (_pExProp->bUseFullTree ? true : false));
 
 				TreeView_Expand(_hTreeCtrl, _hItemExpand, TVE_EXPAND);
 				return;
@@ -1472,7 +1499,7 @@ BOOL ExplorerDialog::SelectItem(LPCTSTR path)
 				{
 					/* if no child item available, draw them */
 					TreeView_SelectItem(_hTreeCtrl, hItem);
-					DrawChildren(hItem);
+					DrawChildren(hItem, (_pExProp->bUseFullTree ? true : false));
 				}
 				hItem = TreeView_GetChild(_hTreeCtrl, hItem);
 
@@ -1493,7 +1520,7 @@ BOOL ExplorerDialog::SelectItem(LPCTSTR path)
 				TreeView_Expand(_hTreeCtrl, hItemSel, TVE_EXPAND);
 				hItemUpdate = hItemSel;
 				GetFolderPathName(hItemSel, TEMP);
-				UpdateChildren(TEMP , hItemSel, FALSE);
+				UpdateChildren(TEMP , hItemSel, FALSE, (_pExProp->bUseFullTree ? true : false));
 				hItem = TreeView_GetChild(_hTreeCtrl, hItemSel);
 			}
 		} while (hItem != NULL);
@@ -1669,7 +1696,7 @@ void ExplorerDialog::UpdateDevices(void)
 				_stprintf(volumeName, _T("%c: [%s]"), 'A' + i, TEMP);
 
 				/* have children */
-				haveChildren = HaveChildren(drivePathName);
+				haveChildren = HaveChildren(drivePathName, (_pExProp->bUseFullTree ? true : false));
 				/* correct modified drivePathName */
 				drivePathName[3]			= '\0';
 			}
@@ -1704,12 +1731,12 @@ void ExplorerDialog::UpdateDevices(void)
 				{
 					/* insert the device when new and not present before */
 					HTREEITEM	hItem	= TreeView_GetNextItem(_hTreeCtrl, hCurrentItem, TVGN_PREVIOUS);
-					InsertChildFolder(volumeName, TVI_ROOT, hItem, isValidDrive);
+					InsertChildFolder(volumeName, TVI_ROOT, hItem, isValidDrive, (_pExProp->bUseFullTree ? true : false));
 				}
 			}
 			else
 			{
-				InsertChildFolder(volumeName, TVI_ROOT, TVI_LAST, isValidDrive);
+				InsertChildFolder(volumeName, TVI_ROOT, TVI_LAST, isValidDrive, (_pExProp->bUseFullTree ? true : false));
 			}
 		}
 		else
@@ -1741,7 +1768,7 @@ void ExplorerDialog::UpdateFolders(void)
 		{
 			GetItemText(hCurrentItem, pszPath, MAX_PATH);
 			pszPath[2] = '\0';
-			UpdateChildren(pszPath, hCurrentItem);
+			UpdateChildren(pszPath, hCurrentItem, TRUE, (_pExProp->bUseFullTree ? true : false));
 		}
 		hCurrentItem = TreeView_GetNextItem(_hTreeCtrl, hCurrentItem, TVGN_NEXT);
 	}

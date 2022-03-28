@@ -198,6 +198,7 @@ void OptionDlg::SetParams(void)
 	::SendDlgItemMessage(_hSelf, IDC_CHECK_AUTO, BM_SETCHECK, _pProp->bAutoUpdate?BST_CHECKED:BST_UNCHECKED, 0);
 	::SendDlgItemMessage(_hSelf, IDC_CHECK_HIDDEN, BM_SETCHECK, _pProp->bShowHidden?BST_CHECKED:BST_UNCHECKED, 0);
 	::SendDlgItemMessage(_hSelf, IDC_CHECK_USEICON, BM_SETCHECK, _pProp->bUseSystemIcons?BST_CHECKED:BST_UNCHECKED, 0);
+	::SendDlgItemMessage(_hSelf, IDC_CHECK_USEFULLTREE, BM_SETCHECK, _pProp->bUseFullTree?BST_CHECKED:BST_UNCHECKED, 0);
 
 	TCHAR temp[MAX_PATH];
 	if (_pProp->iFontSize > 0) 
@@ -242,6 +243,11 @@ BOOL OptionDlg::GetParams(void)
 		_pProp->bViewBraces = TRUE;
 	else
 		_pProp->bViewBraces = FALSE;
+
+	if (::SendDlgItemMessage(_hSelf, IDC_CHECK_USEFULLTREE, BM_GETCHECK, 0, 0) == BST_CHECKED)
+		_pProp->bUseFullTree = TRUE;
+	else
+		_pProp->bUseFullTree = FALSE;
 
 	if (::SendDlgItemMessage(_hSelf, IDC_CHECK_HIDDEN, BM_GETCHECK, 0, 0) == BST_CHECKED)
 		_pProp->bShowHidden = TRUE;
