@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "PropDlg.h"
 
 #include "Explorer.h"
+#include "NppDarkMode.h"
 
 typedef enum eMenuID {
 	FM_NEWLINK = 1,
@@ -50,7 +51,7 @@ class FavesDialog : public DockingDlgInterface, public TreeHelper
 {
 public:
 	FavesDialog(void);
-	~FavesDialog(void);
+	~FavesDialog(void) override;
 
     void init(HINSTANCE hInst, NppData nppData, LPTSTR pCurrentPath, tExProp *prop);
 
@@ -58,14 +59,14 @@ public:
 		::RedrawWindow(_ToolBar.getHSelf(), NULL, NULL, TRUE);
 		InitialFont();
 		ExpandElementsRecursive(TVI_ROOT);
-	};
+	}
 
 	void destroy(void)
 	{
 		/* save settings and destroy the resources */
 		SaveSettings();
 		ReleaseResources();
-	};
+	}
 
    	void doDialog(bool willBeShown = true);
 
@@ -76,7 +77,7 @@ public:
 
 protected:
 
-	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
+	INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
 
 	void tb_cmd(UINT message);
 
@@ -126,23 +127,20 @@ protected:
 			case FAVES_SESSIONS:	return LINK_DLG_FILE;
 			default: return LINK_DLG_NONE;
 		}
-	};
-
-protected:
+	}
 
 	/* Subclassing tree */
+	static const int _treeProcSubclassId = 43;
 	LRESULT runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK wndDefaultTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-		return (((FavesDialog *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA)))->runTreeProc(hwnd, Message, wParam, lParam));
-	};
+	static LRESULT CALLBACK wndSubclassTreeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+		auto lpThis = (FavesDialog*)dwRefData;
+		return lpThis->runTreeProc(hWnd, uMsg, wParam, lParam);
+	}
 
 private:
 	/* Handles */
 	NppData					_nppData;
 	tTbData					_data;
-
-	/* control process */
-	WNDPROC					_hDefaultTreeProc;
 
 	/* Current active font in [Files] */
 	HFONT					_hFont;
@@ -163,12 +161,11 @@ private:
 	BOOL					_addToSession;
 	PELEM					_peOpenLink;
 	tExProp*				_pExProp;
+	NppDarkMode::Colors		_cDarkModeColors;
+	bool					_bDarkModeEnabled;
 
 	/* database */
 	vector<tItemElement>	_vDB;
 };
-
-
-
 
 #endif // FAVESDLG_DEFINE_H

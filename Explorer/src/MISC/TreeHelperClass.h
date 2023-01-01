@@ -31,9 +31,7 @@ using namespace std;
 class TreeHelper
 {
 public:
-	TreeHelper() : _hTreeCtrl(NULL) {};
-	~TreeHelper() {
-	};
+	TreeHelper() : _hTreeCtrl(NULL) {}
 
 protected:
 

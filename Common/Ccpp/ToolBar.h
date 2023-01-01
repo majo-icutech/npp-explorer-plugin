@@ -48,8 +48,8 @@ class ReBar;
 class ToolBar : public Window
 {
 public :
-	ToolBar():Window(), _pTBB(NULL), _nrButtons(0), _nrDynButtons(0), _nrTotalButtons(0), _nrCurrentButtons(0), _pRebar(NULL) {};
-	virtual ~ToolBar(){};
+	ToolBar():Window(), _pTBB(NULL), _nrButtons(0), _nrDynButtons(0), _nrTotalButtons(0), _nrCurrentButtons(0), _pRebar(NULL) {}
+	virtual ~ToolBar(){}
 
 	virtual bool init(HINSTANCE hInst, HWND hPere, toolBarStatusType type, 
 		ToolBarButtonUnit *buttonUnitArray, int arraySize);

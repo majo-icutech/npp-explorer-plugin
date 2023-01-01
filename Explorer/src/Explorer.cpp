@@ -33,9 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <dbt.h>
 #include <atlbase.h>
 
-#define SHGFI_OVERLAYINDEX 0x000000040
-
-
 CONST INT	nbFunc	= 9;
 
 /* information for notepad */
@@ -76,15 +73,15 @@ CONST TCHAR NppExecScriptPath[]	= _T("NppExecScriptPath");
 
 
 /* global values */
-HMODULE				hShell32;
-NppData				nppData;
-HANDLE				g_hModule;
-HWND				g_HSource;
-INT					g_docCnt = 0;
-TCHAR				g_currentFile[MAX_PATH];
-FuncItem			funcItem[nbFunc];
-toolbarIcons		g_TBExplorer;
-toolbarIcons		g_TBFaves;
+HMODULE						hShell32;
+NppData						nppData;
+HANDLE						g_hModule;
+HWND						g_HSource;
+INT							g_docCnt = 0;
+TCHAR						g_currentFile[MAX_PATH];
+FuncItem					funcItem[nbFunc];
+toolbarIconsWithDarkMode	g_TBExplorer;
+toolbarIconsWithDarkMode	g_TBFaves;
 
 /* create classes */
 ExplorerDialog		explorerDlg;
@@ -105,7 +102,7 @@ BOOL				isNotepadCreated	= FALSE;
 CONST TCHAR			LastElement[]		= _T("LastElement");
 
 /* for subclassing */
-WNDPROC				wndProcNotepad		= NULL;
+const int			_idSubclassNppProc	= 43;
 
 /* win version */
 winVer				gWinVersion			= WV_UNKNOWN;
@@ -189,8 +186,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 			ImageList_Destroy(ghImgList);
 
 			/* Remove subclaasing */
-			if (wndProcNotepad != NULL)
-				SetWindowLongPtr(nppData._nppHandle, GWLP_WNDPROC, (LONG_PTR)wndProcNotepad);
+			RemoveWindowSubclass(nppData._nppHandle, SubWndProcNotepad, _idSubclassNppProc);
 
 			FreeLibrary(hShell32);
 	
@@ -209,9 +205,8 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 			break;
 		}
-		case DLL_THREAD_ATTACH:
-			break;
-			
+
+		case DLL_THREAD_ATTACH:			
 		case DLL_THREAD_DETACH:
 			break;
     }
@@ -237,7 +232,7 @@ extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 	helpDlg.init((HINSTANCE)g_hModule, nppData);
 
 	/* Subclassing for Notepad */
-	wndProcNotepad = (WNDPROC)SetWindowLongPtr(nppData._nppHandle, GWLP_WNDPROC, (LPARAM)SubWndProcNotepad);
+	SetWindowSubclass(nppData._nppHandle, SubWndProcNotepad, _idSubclassNppProc, NULL);
 }
 
 extern "C" __declspec(dllexport) LPCTSTR getName()
@@ -273,9 +268,19 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *notifyCode)
 		{
 			/* change menu language */
 			g_TBExplorer.hToolbarBmp = (HBITMAP)::LoadImage((HINSTANCE)g_hModule, MAKEINTRESOURCE(IDB_TB_EXPLORER), IMAGE_BITMAP, 0, 0, (LR_DEFAULTSIZE | LR_LOADMAP3DCOLORS));
+			g_TBExplorer.hToolbarIcon = (HICON)::LoadImage((HINSTANCE)g_hModule, MAKEINTRESOURCE(IDI_EXPLORE), IMAGE_ICON, 0, 0, (LR_DEFAULTSIZE | LR_LOADMAP3DCOLORS));
+			g_TBExplorer.hToolbarIconDarkMode = g_TBExplorer.hToolbarIcon;
 			g_TBFaves.hToolbarBmp = (HBITMAP)::LoadImage((HINSTANCE)g_hModule, MAKEINTRESOURCE(IDB_TB_FAVES), IMAGE_BITMAP, 0, 0, (LR_DEFAULTSIZE | LR_LOADMAP3DCOLORS));
-			::SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON, (WPARAM)funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, (LPARAM)&g_TBExplorer);
-			::SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON, (WPARAM)funcItem[DOCKABLE_FAVORTIES_INDEX]._cmdID, (LPARAM)&g_TBFaves);
+			g_TBFaves.hToolbarIcon = (HICON)::LoadImage((HINSTANCE)g_hModule, MAKEINTRESOURCE(IDI_HEART), IMAGE_ICON, 0, 0, (LR_DEFAULTSIZE | LR_LOADMAP3DCOLORS));
+			g_TBFaves.hToolbarIconDarkMode = g_TBFaves.hToolbarIcon;
+			if (FALSE == SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON_FORDARKMODE, (WPARAM)funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, (LPARAM)&g_TBExplorer))
+			{
+				SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON_DEPRECATED, (WPARAM)funcItem[DOCKABLE_EXPLORER_INDEX]._cmdID, (LPARAM)&g_TBExplorer);
+			}
+			if (FALSE == SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON_FORDARKMODE, (WPARAM)funcItem[DOCKABLE_FAVORTIES_INDEX]._cmdID, (LPARAM)&g_TBFaves))
+			{
+				SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON_DEPRECATED, (WPARAM)funcItem[DOCKABLE_FAVORTIES_INDEX]._cmdID, (LPARAM)&g_TBFaves);
+			}
 		}
 		if (notifyCode->nmhdr.code == NPPN_READY)
 		{
@@ -283,7 +288,7 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *notifyCode)
 			favesDlg.UpdateColors();
 			isNotepadCreated = TRUE;
 		}
-		if (notifyCode->nmhdr.code == NPPN_WORDSTYLESUPDATED)
+		if (notifyCode->nmhdr.code == NPPN_WORDSTYLESUPDATED || notifyCode->nmhdr.code == NPPN_DARKMODECHANGED)
 		{
 			explorerDlg.UpdateColors();
 			favesDlg.UpdateColors();
@@ -520,10 +525,8 @@ void openHelpDlg(void)
 /**************************************************************************
  *	Subclass of Notepad
  */
-LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-	LRESULT			ret		= 0;
-
 	switch (message)
 	{
 		case WM_ACTIVATE:
@@ -539,8 +542,7 @@ LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARA
 					::SetTimer(explorerDlg.getHSelf(), EXT_UPDATEACTIVATEPATH, 200, NULL);
 				}
 			}
-			ret = ::CallWindowProc(wndProcNotepad, hWnd, message, wParam, lParam);
-			break;
+			return DefSubclassProc(hWnd, message, wParam, lParam);
 		}
 		case WM_DEVICECHANGE:
 		{
@@ -550,15 +552,11 @@ LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARA
 				::KillTimer(explorerDlg.getHSelf(), EXT_UPDATEDEVICE);
 				::SetTimer(explorerDlg.getHSelf(), EXT_UPDATEDEVICE, 1000, NULL);
 			}
-			ret = ::CallWindowProc(wndProcNotepad, hWnd, message, wParam, lParam);
-			break;
+			return DefSubclassProc(hWnd, message, wParam, lParam);
 		}
 		default:
-			ret = ::CallWindowProc(wndProcNotepad, hWnd, message, wParam, lParam);
-			break;
+			return DefSubclassProc(hWnd, message, wParam, lParam);
 	}
-
-	return ret;
 }
 
 /**************************************************************************

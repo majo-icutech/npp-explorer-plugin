@@ -83,6 +83,7 @@ FileList::FileList(void)
 	_tcscpy(_strSearchFile, _T(""));
 	_tcscpy(_szFileFilter, _T("*.*"));
 	_vFileList.clear();
+	ZeroMemory(&_numberFmt, sizeof(_numberFmt));
 }
 
 FileList::~FileList(void)
@@ -135,6 +136,17 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 	DWORD	dwFlags	= 0;
 	_hOverThread = ::CreateThread(NULL, 0, FileOverlayThread, this, 0, &dwFlags);
 
+	/* Get decimal and thousands separator */
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, _szDecimalSeparator, size(_szDecimalSeparator));
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STHOUSAND, _szThousandsSeparator, size(_szThousandsSeparator));
+
+	_numberFmt.NumDigits = 0;
+	_numberFmt.Grouping = 3;
+	_numberFmt.lpDecimalSep = _szDecimalSeparator;
+	_numberFmt.lpThousandSep = _szThousandsSeparator;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_INEGNUMBER | LOCALE_RETURN_NUMBER, (LPWSTR)&_numberFmt.NegativeOrder, sizeof(_numberFmt.NegativeOrder));
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_ILZERO | LOCALE_RETURN_NUMBER, (LPWSTR)&_numberFmt.LeadingZero, sizeof(_numberFmt.LeadingZero));
+
 	initFont();
 
 	/* load sort bitmaps */
@@ -153,8 +165,7 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 	ListView_SetCallbackMask(_hSelf, LVIS_OVERLAYMASK | LVIS_CUT);
 
 	/* subclass list control */
-	lpFileListClass = this;
-	_hDefaultListProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hSelf, GWLP_WNDPROC, (LONG_PTR)wndDefaultListProc));
+	SetWindowSubclass(_hSelf, wndDefaultListProc, _idSubclassListProc, (DWORD_PTR)this);
 
 	/* set image list and icon */
 	_hImlParent = GetSmallImageList(FALSE);
@@ -162,8 +173,8 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 	ListView_SetImageList(_hSelf, _hImlListSys, LVSIL_SMALL);
 
 	/* get header control and subclass it */
-	hWndServer = _hHeader = ListView_GetHeader(_hSelf);
-	_hDefaultHeaderProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(_hHeader, GWLP_WNDPROC, (LONG_PTR)wndDefaultHeaderProc));
+	hWndServer = _hHeader = ListView_GetHeader(_hSelf);	
+	SetWindowSubclass(_hHeader, wndDefaultHeaderProc, _idSubclassHeaderProc, (DWORD_PTR)this);
 
 	/* set here the columns */
 	SetColumns();
@@ -178,6 +189,12 @@ void FileList::init(HINSTANCE hInst, HWND hParent, HWND hParentList)
 	fmtetc.lindex		= -1; 
 	fmtetc.tymed		= TYMED_HGLOBAL;
 	AddSuportedFormat(_hSelf, fmtetc); 
+}
+
+void FileList::destroy()
+{
+	RemoveWindowSubclass(_hSelf, wndDefaultListProc, _idSubclassListProc);
+	RemoveWindowSubclass(_hHeader, wndDefaultHeaderProc, _idSubclassHeaderProc);
 }
 
 void FileList::initProp(tExProp* prop)
@@ -197,7 +214,7 @@ LRESULT FileList::runListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 	{
 		case WM_GETDLGCODE:
 		{
-			return DLGC_WANTALLKEYS | ::CallWindowProc(_hDefaultListProc, hwnd, Message, wParam, lParam);
+			return DLGC_WANTALLKEYS | DefSubclassProc(hwnd, Message, wParam, lParam);
 		}
 		case WM_CHAR:
 		{
@@ -418,7 +435,7 @@ LRESULT FileList::runListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			break;
 	}
 	
-	return ::CallWindowProc(_hDefaultListProc, hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hwnd, Message, wParam, lParam);
 }
 
 /****************************************************************************
@@ -481,7 +498,7 @@ LRESULT FileList::runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM l
 			break;
 	}
 
-	return ::CallWindowProc(_hDefaultHeaderProc, hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hwnd, Message, wParam, lParam);
 }
 
 void FileList::DrawDivider(UINT x)
@@ -1393,116 +1410,57 @@ BOOL FileList::FindNextItemInList(UINT maxFolder, UINT maxData, LPUINT puPos)
 
 void FileList::GetSize(__int64 size, wstring & str)
 {
-	TCHAR	TEMP[MAX_PATH];
+	TCHAR origSize[MAX_PATH];
+	TCHAR formattedSize[MAX_PATH];
+	str = _T("");
 
 	switch (_pExProp->fmtSize)
 	{
 		case SFMT_BYTES:
-		{
-			_stprintf(TEMP, _T("%03I64d"), size % 1000);
-			size /= 1000;
-			str = TEMP;
-
-			while (size)
-			{
-				_stprintf(TEMP, _T("%03I64d."), size % 1000);
-				size /= 1000;
-				str = TEMP + str;
-			}
-
-			break;
-		}
 		case SFMT_KBYTE:
 		{
-			size /= 1024;
-			_stprintf(TEMP, _T("%03I64d"), size % 1000);
-			size /= 1000;
-			str = TEMP;
-
-			while (size)
+			size = _pExProp->fmtSize == SFMT_KBYTE ? size / 1024 : size;
+			_stprintf(origSize, _T("%I64d"), size);
+			GetNumberFormat(LOCALE_USER_DEFAULT, 0, origSize, &_numberFmt, formattedSize, MAX_PATH);
+			str = formattedSize;
+			if (_pExProp->fmtSize == SFMT_KBYTE)
 			{
-				_stprintf(TEMP, _T("%03I64d."), size % 1000);
-				size /= 1000;
-				str = TEMP + str;
+				str = str + _T(" kB");
 			}
-
-			str = str + _T(" kB");
-
 			break;
 		}
 		case SFMT_DYNAMIC:
-		{
-			INT i	= 0;
-
-			str	= _T("000");
-
-			for (i = 0; (i < 3) && (size != 0); i++)
-			{
-				_stprintf(TEMP, _T("%03I64d"), size % 1024);
-				size /= 1024;
-				str = TEMP;
-			}
-
-			while (size)
-			{
-				_stprintf(TEMP, _T("%03I64d."), size % 1000);
-				size /= 1000;
-				str = TEMP + str;
-			}
-
-			switch (i)
-			{
-				case 0:
-				case 1: str = str + _T(" b"); break;
-				case 2: str = str + _T(" k"); break;
-				default: str = str + _T(" M"); break;
-			}
-			break;
-		}
 		case SFMT_DYNAMIC_EX:
 		{
-			INT		i		= 0;
-			__int64 komma	= 0;
+			int i = 0;
+			double dblSize = size;
 
-			str = _T("000");
-
-			for (i = 0; (i < 3) && (size != 0); i++)
+			while (dblSize > 1024 && i < 3)
 			{
-				if (i < 1)
-					_stprintf(TEMP, _T("%03I64d"), size);
-				else
-					_stprintf(TEMP, _T("%03I64d,%I64d"), size % 1024, komma);
-				komma = (size % 1024) / 100;
-				size /= 1024;
-				str = TEMP;
+				dblSize /= 1024.;
+				i++;
 			}
 
-			while (size)
-			{
-				_stprintf(TEMP, _T("%03I64d."), size % 1000);
-				size /= 1000;
-				str = TEMP + str;
-			}
+			NUMBERFMT nfCopy = _numberFmt;
+			nfCopy.NumDigits = _pExProp->fmtSize == SFMT_DYNAMIC_EX ? 1 : 0;
+
+			_stprintf(origSize, _T("%f"), dblSize);
+			GetNumberFormat(LOCALE_USER_DEFAULT, 0, origSize, &nfCopy, formattedSize, MAX_PATH);
+			str = formattedSize;
 
 			switch (i)
 			{
-				case 0:
-				case 1: str = str + _T(" b"); break;
-				case 2: str = str + _T(" k"); break;
-				default: str = str + _T(" M"); break;
+			case 0:
+				str = str + _T(" b"); break;
+			case 1:
+				str = str + _T(" k"); break;
+			case 2:
+				str = str + _T(" M"); break;
+			default:
+				str = str + _T(" G"); break;
 			}
 			break;
 		}
-		default:
-			break;
-	}
-
-	for (INT i = 0; i < 2; i++)
-	{
-		if (str[i] == '0')
-			str[i] = ' ';
-		else
-			break;
 	}
 }
 

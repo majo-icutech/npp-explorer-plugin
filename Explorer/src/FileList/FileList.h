@@ -36,8 +36,6 @@ typedef struct {
 } tStaInfo;
 
 
-static class FileList*	lpFileListClass	= NULL;
-
 /* pattern for column resize by mouse */
 static const WORD DotPattern[] = 
 {
@@ -81,14 +79,14 @@ public:
 	void SelectCurFile(void);
 	void SelectFolder(LPTSTR selFolder);
 
-	virtual void destroy() {};
-	virtual void redraw(void) {
+	virtual void destroy() override;
+	virtual void redraw() {
 		initFont();
 		_hImlListSys = GetSmallImageList(_pExProp->bUseSystemIcons);
 		ListView_SetImageList(_hSelf, _hImlListSys, LVSIL_SMALL);
 		SetColumns();
 		Window::redraw();
-	};
+	}
 
 	void ToggleStackRec(void);					// enables/disable trace of viewed directories
 	void ResetDirStack(void);					// resets the stack
@@ -109,16 +107,20 @@ public:
 protected:
 
 	/* Subclassing list control */
+	static const int _idSubclassListProc = 43;
 	LRESULT runListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK wndDefaultListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-		return (lpFileListClass->runListProc(hwnd, Message, wParam, lParam));
-	};
+	static LRESULT CALLBACK wndDefaultListProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+		FileList* lpThis = (FileList*)dwRefData;
+		return lpThis->runListProc(hwnd, Message, wParam, lParam);
+	}
 
 	/* Subclassing header control */
+	static const int _idSubclassHeaderProc = 43;
 	LRESULT runHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK wndDefaultHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-		return (lpFileListClass->runHeaderProc(hwnd, Message, wParam, lParam));
-	};
+	static LRESULT CALLBACK wndDefaultHeaderProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+		FileList* lpThis = (FileList*)dwRefData;
+		return lpThis->runHeaderProc(hwnd, Message, wParam, lParam);
+	}
 
 	void ReadIconToList(UINT iItem, LPINT piIcon, LPINT piOverlayed);
 	void ReadArrayToList(LPTSTR szItem, INT iItem ,INT iSubItem);
@@ -158,7 +160,7 @@ protected:
 		ListView_SetItemState(_hSelf, item, LVIS_SELECTED|LVIS_FOCUSED, 0xFF);
 		ListView_EnsureVisible(_hSelf, item, TRUE);
 		ListView_SetSelectionMark(_hSelf, item);
-	};
+	}
 
 	void GetSize(__int64 size, wstring& str);
 	void GetDate(FILETIME ftLastWriteTime, wstring& str);
@@ -184,8 +186,6 @@ private:	/* for thread */
 private:
 	HWND						_hHeader;
 	HIMAGELIST					_hImlListSys;
-	WNDPROC						_hDefaultListProc;
-	WNDPROC						_hDefaultHeaderProc;
 
 	tExProp*					_pExProp;
 
@@ -215,6 +215,11 @@ private:
 	INT							_iMouseTrackItem;
 	LONG						_lMouseTrackPos;
 	INT							_iBltPos;
+
+	/* Character used for separating decimals and thousands */
+	TCHAR						_szDecimalSeparator[8];
+	TCHAR						_szThousandsSeparator[8];
+	NUMBERFMT					_numberFmt;
 
 	/* current file filter */
 	TCHAR						_szFileFilter[MAX_PATH];

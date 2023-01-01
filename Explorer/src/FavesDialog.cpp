@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #include <shlobj.h>
+
+#include "NppDarkMode.h"
 #pragma warning(pop)
 
 extern winVer gWinVersion;
@@ -56,7 +58,7 @@ static ToolBarButtonUnit toolBarIcons[] = {
     {IDM_EX_LINK_EDIT,	    IDI_SEPARATOR_ICON,		IDI_SEPARATOR_ICON,		IDI_SEPARATOR_ICON, IDB_EX_LINKEDIT, 0}
 };    
 		
-static LPTSTR szToolTip[23] = {
+static LPCTSTR szToolTip[23] = {
 	_T("Link Current File..."),
 	_T("Link Current Folder..."),
 	_T("New Link..."),
@@ -100,7 +102,7 @@ void FavesDialog::doDialog(bool willBeShown)
 		create(&_data);
 
 		// define the default docking behaviour
-		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ICONTAB;
+		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ICONTAB | DWS_USEOWNDARKMODE;
 		_data.pszName		= _T("Favorites");
 		_data.hIconTab		= (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_HEART), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
 		_data.pszModuleName	= getPluginFileName();
@@ -250,7 +252,15 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 							{
 								HTREEITEM	hItem		= (HTREEITEM)lpCD->nmcd.dwItemSpec;
 								PELEM		pElem		= (PELEM)GetParam(hItem);
-								BOOL		bUserImage	= FALSE;
+
+								if (_bDarkModeEnabled)
+								{
+									if ((lpCD->nmcd.uItemState & CDIS_SELECTED) == CDIS_SELECTED)
+									{
+										lpCD->clrTextBk = _cDarkModeColors.hotBackground;
+										lpCD->clrText = _cDarkModeColors.text;
+									}
+								}
 
 								if (pElem) {
 									if ((pElem->uParam & FAVES_FILES) && (pElem->uParam & FAVES_PARAM_LINK)) {
@@ -330,17 +340,49 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 						break;
 				}
 			}
-			else if ((nmhdr->hwndFrom == _Rebar.getHSelf()) && (nmhdr->code == RBN_CHEVRONPUSHED))
+			else if (nmhdr->hwndFrom == _Rebar.getHSelf())
 			{
-				NMREBARCHEVRON * lpnm = (NMREBARCHEVRON*)nmhdr;
-				if (lpnm->wID == REBAR_BAR_TOOLBAR)
+				if (nmhdr->code == RBN_CHEVRONPUSHED)
 				{
-					POINT pt;
-					pt.x = lpnm->rc.left;
-					pt.y = lpnm->rc.bottom;
-					ClientToScreen(nmhdr->hwndFrom, &pt);
-					tb_cmd(_ToolBar.doPopop(pt));
-					return TRUE;
+					NMREBARCHEVRON* lpnm = (NMREBARCHEVRON*)nmhdr;
+					if (lpnm->wID == REBAR_BAR_TOOLBAR)
+					{
+						POINT pt;
+						pt.x = lpnm->rc.left;
+						pt.y = lpnm->rc.bottom;
+						ClientToScreen(nmhdr->hwndFrom, &pt);
+						tb_cmd(_ToolBar.doPopop(pt));
+						return TRUE;
+					}
+				}
+				break;
+			}
+			else if (nmhdr->hwndFrom == _ToolBar.getHSelf())
+			{
+				if (nmhdr->code == NM_CUSTOMDRAW)
+				{
+					LPNMTBCUSTOMDRAW lpCD = (LPNMTBCUSTOMDRAW)lParam;
+
+					switch (lpCD->nmcd.dwDrawStage)
+					{
+					case CDDS_PREPAINT:
+						if (_bDarkModeEnabled)
+						{
+							HBRUSH hBrush = ::CreateSolidBrush(_cDarkModeColors.background);							
+							FillRect(lpCD->nmcd.hdc, &lpCD->nmcd.rc, hBrush);
+							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_NEWFONT);
+							DeleteObject(hBrush);
+						}
+						else
+						{
+							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_DODEFAULT);
+						}
+						return TRUE;
+					default:
+						break;
+					}
+
+					return FALSE;
 				}
 				break;
 			}
@@ -367,6 +409,7 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 			/* set position of toolbar */
 			getClientRect(rc);
 			_Rebar.reSizeTo(rc);
+			_ToolBar.reSizeTo(rc);
 
 			/* set position of tree control */
 			rc.top    += 26;
@@ -399,6 +442,8 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 
 			_ToolBar.destroy();
 
+			RemoveWindowSubclass(_hTreeCtrl, wndSubclassTreeProc, _treeProcSubclassId);
+
 			/* destroy duplicated handle when we are on W2k machine */
 			if (gWinVersion == WV_W2K)
 				ImageList_Destroy(_hImageListSys);
@@ -423,7 +468,7 @@ LRESULT FavesDialog::runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM 
 	{
 	case WM_GETDLGCODE:
 	{
-		return DLGC_WANTALLKEYS | ::CallWindowProc(_hDefaultTreeProc, hwnd, Message, wParam, lParam);
+		return DLGC_WANTALLKEYS | DefSubclassProc(hwnd, Message, wParam, lParam);
 	}
 	case WM_KEYDOWN:
 	case WM_LBUTTONDBLCLK:
@@ -443,12 +488,6 @@ LRESULT FavesDialog::runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM 
 			{
 				_peOpenLink = pElem;
 				::PostMessage(_hSelf, EXM_OPENLINK, 0, 0);
-
-				if ((!(pElem->uParam & FAVES_PARAM_MAIN)) &&
-					((pElem->uParam & FAVES_PARAM) == FAVES_SESSIONS))
-				{
-					return TRUE;
-				}
 			}
 			else
 			{
@@ -464,8 +503,8 @@ LRESULT FavesDialog::runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM 
 	default:
 		break;
 	}
-	
-	return ::CallWindowProc(_hDefaultTreeProc, hwnd, Message, wParam, lParam);
+
+	return DefSubclassProc(hwnd, Message, wParam, lParam);
 }
 
 void FavesDialog::tb_cmd(UINT message)
@@ -561,8 +600,7 @@ void FavesDialog::InitialDialog(void)
 	InitialFont();
 
 	/* subclass tree */
-	::SetWindowLongPtr(_hTreeCtrl, GWLP_USERDATA, (LONG_PTR)this);
-	_hDefaultTreeProc = (WNDPROC)::SetWindowLongPtr(_hTreeCtrl, GWLP_WNDPROC, (LONG_PTR)wndDefaultTreeProc);
+	SetWindowSubclass(_hTreeCtrl, wndSubclassTreeProc, _treeProcSubclassId, (DWORD_PTR)this);
 
 	/* Load Image List */
 	_hImageListSys	= GetSmallImageList(TRUE);
@@ -2132,11 +2170,21 @@ void FavesDialog::SaveElementTreeRecursive(PELEM pElem, HANDLE hFile)
 
 void FavesDialog::UpdateColors()
 {
-	auto bgColor = (COLORREF)::SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR, 0, 0);
-	auto fgColor = (COLORREF)::SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR, 0, 0);
+	auto isDarkModeEnabled  = (bool)SendMessage(_nppData._nppHandle, NPPM_ISDARKMODEENABLED, NULL, NULL);
+	auto result = (bool)SendMessage(_nppData._nppHandle, NPPM_GETDARKMODECOLORS, sizeof(_cDarkModeColors), (LPARAM)(&_cDarkModeColors));
 
-	TreeView_SetBkColor(_hTreeCtrl, bgColor);
-	TreeView_SetTextColor(_hTreeCtrl, fgColor);
+	_bDarkModeEnabled = isDarkModeEnabled && result;
+
+	if (_bDarkModeEnabled)
+	{
+		TreeView_SetBkColor(_hTreeCtrl, _cDarkModeColors.background);
+		TreeView_SetTextColor(_hTreeCtrl, _cDarkModeColors.text);
+	}
+	else
+	{
+		TreeView_SetBkColor(_hTreeCtrl, RGB(255, 255, 255));
+		TreeView_SetTextColor(_hTreeCtrl, RGB(0, 0, 0));
+	}
 
 	::InvalidateRect(_hTreeCtrl, NULL, TRUE);
 }

@@ -131,7 +131,7 @@ static ToolBarButtonUnit toolBarIconsNT[] = {
 /** 
  *	Note: On change, keep sure to change order of IDM_EX_... also
  */
-static LPTSTR szToolTip[23] = {
+static LPCTSTR szToolTip[23] = {
 	_T("Previous Folder"),
 	_T("Next Folder"),
 	_T("New File..."),
@@ -145,8 +145,6 @@ static LPTSTR szToolTip[23] = {
 
 ExplorerDialog::ExplorerDialog(void) : DockingDlgInterface(IDD_EXPLORER_DLG)
 {
-	_hDefaultTreeProc		= NULL;
-	_hDefaultSplitterProc	= NULL;
 	_hTreeCtrl				= NULL;
 	_hListCtrl				= NULL;
 	_hHeader				= NULL;
@@ -161,10 +159,6 @@ ExplorerDialog::ExplorerDialog(void) : DockingDlgInterface(IDD_EXPLORER_DLG)
 	_bOldRectInitilized		= FALSE;
 	_hExploreVolumeThread	= NULL;
 	_hItemExpand			= NULL;
-}
-
-ExplorerDialog::~ExplorerDialog(void)
-{
 }
 
 
@@ -185,7 +179,7 @@ void ExplorerDialog::doDialog(bool willBeShown)
 		create(&_data);
 
 		// define the default docking behaviour
-		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ADDINFO | DWS_ICONTAB;
+		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ADDINFO | DWS_ICONTAB | DWS_USEOWNDARKMODE;
 		_data.pszName		= _T("Explorer");
 		_data.pszAddInfo	= _pExProp->szCurrentPath;
 		_data.hIconTab		= (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_EXPLORE), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
@@ -323,10 +317,39 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 			{
 				return _FileList.notify(wParam, lParam);
 			}
-			else if ((nmhdr->hwndFrom == _ToolBar.getHSelf()) && (nmhdr->code == TBN_DROPDOWN))
+			else if (nmhdr->hwndFrom == _ToolBar.getHSelf())
 			{
-				tb_not((LPNMTOOLBAR)lParam);
-				return TBDDRET_NODEFAULT;
+				if (nmhdr->code == TBN_DROPDOWN)
+				{
+					tb_not((LPNMTOOLBAR)lParam);
+					return TBDDRET_NODEFAULT;
+				}
+				else if (nmhdr->code == NM_CUSTOMDRAW)
+				{
+					LPNMTBCUSTOMDRAW lpCD = (LPNMTBCUSTOMDRAW)lParam;
+
+					switch (lpCD->nmcd.dwDrawStage)
+					{
+					case CDDS_PREPAINT:
+						if (_bDarkModeEnabled)
+						{
+							HBRUSH hBrush = ::CreateSolidBrush(_cDarkModeColors.background);
+							FillRect(lpCD->nmcd.hdc, &lpCD->nmcd.rc, hBrush);
+							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_NEWFONT);
+							DeleteObject(hBrush);
+						}
+						else
+						{
+							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_DODEFAULT);
+						}
+						return TRUE;
+					default:
+						break;
+					}
+
+					return FALSE;
+				}
+				break;
 			}
 			else if ((nmhdr->hwndFrom == _Rebar.getHSelf()) && (nmhdr->code == RBN_CHEVRONPUSHED))
 			{
@@ -409,7 +432,7 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 				hWnd = ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
 				::GetWindowRect(hWnd, &rcWnd);
 				rc.top	     = rcBuff.bottom - 18;
-				rc.bottom    = 12;
+				rc.bottom    = 16;
 				rc.left     += 2;
 				rc.right     = rcWnd.right - rcWnd.left;
 				::SetWindowPos(hWnd, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
@@ -452,7 +475,7 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 				hWnd = ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
 				::GetWindowRect(hWnd, &rcWnd);
 				rc.top	     = rcBuff.bottom - 18;
-				rc.bottom    = 12;
+				rc.bottom    = 16;
 				rc.left     += 2;
 				rc.right     = rcWnd.right - rcWnd.left;
 				::SetWindowPos(hWnd, NULL, rc.left, rc.top, rc.right, rc.bottom, SWP_NOZORDER | SWP_SHOWWINDOW);
@@ -488,12 +511,40 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 			{
 				RECT		rc		= pDrawItemStruct->rcItem;
 				HDC			hDc		= pDrawItemStruct->hDC;
-				HBRUSH		bgbrush	= ::CreateSolidBrush(::GetSysColor(COLOR_BTNFACE));
+				HBRUSH		bgbrush	= ::CreateSolidBrush(_bDarkModeEnabled ? _cDarkModeColors.background : GetSysColor(COLOR_3DFACE));
 
 				/* fill background */
 				::FillRect(hDc, &rc, bgbrush);
 
 				::DeleteObject(bgbrush);
+				return TRUE;
+			}
+			break;
+		}
+		case WM_CTLCOLORSTATIC:
+		{
+			if (_bDarkModeEnabled)
+			{
+				HDC hdcStatic = (HDC)wParam;
+
+				SetTextColor(hdcStatic, _cDarkModeColors.text);
+				SetBkColor(hdcStatic, _cDarkModeColors.background);
+
+				return TRUE;
+			}
+			break;
+		}
+		case WM_ERASEBKGND:
+		{
+			if (_bDarkModeEnabled)
+			{
+				HBRUSH bgbrush = CreateSolidBrush(_cDarkModeColors.background);
+				RECT clientRect = { 0 };
+				GetClientRect(_hSelf, &clientRect);
+				FillRect((HDC)wParam, &clientRect, bgbrush);
+
+				DeleteObject(bgbrush);
+
 				return TRUE;
 			}
 			break;
@@ -514,10 +565,11 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 				_pExProp->strLastFilter = szLastFilter;
 
 			::SetEvent(g_hEvent[EID_THREAD_END]);
-			if (::WaitForSingleObject(_hExploreVolumeThread, 50) != WAIT_OBJECT_0)
-				Sleep(1);
-			if (::WaitForSingleObject(g_hThread, 50) != WAIT_OBJECT_0)
-				Sleep(1);
+			WaitForSingleObject(_hExploreVolumeThread, 1000);
+			WaitForSingleObject(g_hThread, 1000);
+
+			TerminateThread(_hExploreVolumeThread, -1);
+			TerminateThread(g_hThread, -1);
 
 			/* destroy events */
 			for (int i = 0; i < EID_MAX; i++)
@@ -527,12 +579,12 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 			::CloseHandle(g_hThread);
 
 			_ToolBar.destroy();
+			_FileList.destroy();
+			_ComboFilter.destroy();
 
 			/* unsubclass */
-			if (_hDefaultTreeProc != NULL)
-				::SetWindowLongPtr(_hTreeCtrl, GWLP_WNDPROC, (LONG_PTR)_hDefaultTreeProc);
-			if (_hDefaultSplitterProc != NULL)
-				::SetWindowLongPtr(_hSplitterCtrl, GWLP_WNDPROC, (LONG_PTR)_hDefaultSplitterProc);
+			RemoveWindowSubclass(_hTreeCtrl, wndDefaultTreeProc, _idSubclassTreeProc);
+			RemoveWindowSubclass(_hSplitterCtrl, wndDefaultSplitterProc, _idSubclassSplitterProc);
 
 			::DeleteObject(_hFont);
 
@@ -707,7 +759,7 @@ LRESULT ExplorerDialog::runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPAR
 	{
 		case WM_GETDLGCODE:
 		{
-			return DLGC_WANTALLKEYS | ::CallWindowProc(_hDefaultTreeProc, hwnd, Message, wParam, lParam);
+			return DLGC_WANTALLKEYS | DefSubclassProc(hwnd, Message, wParam, lParam);
 		}
 		case WM_CHAR:
 		{
@@ -857,11 +909,11 @@ LRESULT ExplorerDialog::runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPAR
 			break;
 	}
 	
-	return ::CallWindowProc(_hDefaultTreeProc, hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hwnd, Message, wParam, lParam);
 }
 
 /****************************************************************************
- *	Message handling of header
+ *	Message handling of splitter
  */
 LRESULT ExplorerDialog::runSplitterProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -957,7 +1009,7 @@ LRESULT ExplorerDialog::runSplitterProc(HWND hwnd, UINT Message, WPARAM wParam, 
 			break;
 	}
 	
-	return ::CallWindowProc(_hDefaultSplitterProc, hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hwnd, Message, wParam, lParam);
 }
 
 void ExplorerDialog::tb_cmd(UINT message)
@@ -1315,14 +1367,12 @@ void ExplorerDialog::InitialDialog(void)
 	InitialFont();
 
 	/* subclass tree */
-	::SetWindowLongPtr(_hTreeCtrl, GWLP_USERDATA, (LONG_PTR)this);
-	_hDefaultTreeProc = (WNDPROC)::SetWindowLongPtr(_hTreeCtrl, GWLP_WNDPROC, (LONG_PTR)wndDefaultTreeProc);
+	SetWindowSubclass(_hTreeCtrl, wndDefaultTreeProc, _idSubclassTreeProc, (DWORD_PTR)this);
 
 	/* subclass splitter */
 	_hSplitterCursorUpDown		= ::LoadCursor(_hInst, MAKEINTRESOURCE(IDC_UPDOWN));
 	_hSplitterCursorLeftRight	= ::LoadCursor(_hInst, MAKEINTRESOURCE(IDC_LEFTRIGHT));
-	::SetWindowLongPtr(_hSplitterCtrl, GWLP_USERDATA, (LONG_PTR)this);
-	_hDefaultSplitterProc = (WNDPROC)::SetWindowLongPtr(_hSplitterCtrl, GWLP_WNDPROC, (LONG_PTR)wndDefaultSplitterProc);
+	SetWindowSubclass(_hSplitterCtrl, wndDefaultSplitterProc, _idSubclassSplitterProc, (DWORD_PTR)this);
 
 	/* Load Image List */
 	::SendMessage(_hTreeCtrl, TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)GetSmallImageList(_pExProp->bUseSystemIcons));
@@ -1925,15 +1975,29 @@ bool ExplorerDialog::doPaste(LPCTSTR pszTo, LPDROPFILES hData, const DWORD & dwE
 
 void ExplorerDialog::UpdateColors()
 {
-	auto bgColor = (COLORREF)::SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR, 0, 0);
-	auto fgColor = (COLORREF)::SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR, 0, 0);
+	auto isDarkModeEnabled = (bool)SendMessage(_nppData._nppHandle, NPPM_ISDARKMODEENABLED, NULL, NULL);
+	auto result = (bool)SendMessage(_nppData._nppHandle, NPPM_GETDARKMODECOLORS, sizeof(_cDarkModeColors), (LPARAM)(&_cDarkModeColors));
 
-	TreeView_SetBkColor(_hTreeCtrl, bgColor);
-	TreeView_SetTextColor(_hTreeCtrl, fgColor);
+	_bDarkModeEnabled = isDarkModeEnabled && result;
 
-	ListView_SetBkColor(_hListCtrl, bgColor);
-	ListView_SetTextColor(_hListCtrl, fgColor);
-	ListView_SetTextBkColor(_hListCtrl, CLR_NONE);
+	if (_bDarkModeEnabled)
+	{
+		TreeView_SetBkColor(_hTreeCtrl, _cDarkModeColors.background);
+		TreeView_SetTextColor(_hTreeCtrl, _cDarkModeColors.text);
+
+		ListView_SetBkColor(_hListCtrl, _cDarkModeColors.background);
+		ListView_SetTextColor(_hListCtrl, _cDarkModeColors.text);
+		ListView_SetTextBkColor(_hListCtrl, CLR_NONE);
+	}
+	else
+	{
+		TreeView_SetBkColor(_hTreeCtrl, RGB(0xFF, 0xFF, 0xFF));
+		TreeView_SetTextColor(_hTreeCtrl, RGB(0x00, 0x00, 0x00));
+
+		ListView_SetBkColor(_hListCtrl, RGB(0xFF, 0xFF, 0xFF));
+		ListView_SetTextColor(_hListCtrl, RGB(0x00, 0x00, 0x00));
+		ListView_SetTextBkColor(_hListCtrl, CLR_NONE);
+	}
 
 	// also look at listview's custom draw code (NM_CUSTOMDRAW) in FileList.cpp
 	// the code there was modified to use ListView_GetBkColor and ListView_GetTextColor

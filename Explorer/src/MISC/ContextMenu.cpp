@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 IContextMenu2 * g_IContext2		= NULL;
 IContextMenu3 * g_IContext3		= NULL;
 
-WNDPROC			g_OldWndProc	= NULL;
+bool			g_subclassApplied = false;
 
 /* global explorer params */
 extern tExProp	exProp;
@@ -95,7 +95,7 @@ BOOL ContextMenu::GetContextMenu (void ** ppContextMenu, int & iMenuType)
 }
 
 
-LRESULT CALLBACK ContextMenu::HookWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ContextMenu::HookWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
 	switch (message)
 	{ 
@@ -128,8 +128,8 @@ LRESULT CALLBACK ContextMenu::HookWndProc(HWND hWnd, UINT message, WPARAM wParam
 			break;
 	}
 
-	// call original WndProc of window to prevent undefined bevhaviour of window
-	return ::CallWindowProc (g_OldWndProc, hWnd, message, wParam, lParam);
+	// call original WndProc of window to prevent undefined behaviour of window
+	return DefSubclassProc(hWnd, message, wParam, lParam);
 }
 
 
@@ -167,10 +167,10 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 										CMF_EXPLORE | ((_strFirstElement.size() > 4)?CMF_CANRENAME:0));
  
 		// subclass window to handle menurelated messages in ContextMenu 
-		g_OldWndProc	= NULL;
+		g_subclassApplied = false;
 		if (iMenuType > 1)	// only subclass if its version 2 or 3
 		{
-			g_OldWndProc = (WNDPROC)::SetWindowLongPtr (hWndParent, GWLP_WNDPROC, (LONG_PTR) HookWndProc);
+			g_subclassApplied = SetWindowSubclass(hWndParent, HookWndProc, _idSubclassContextMenuProc, NULL);
 			if (iMenuType == 2)
 				g_IContext2 = (LPCONTEXTMENU2) pContextMenu;
 			else	// version 3
@@ -340,9 +340,9 @@ UINT ContextMenu::ShowContextMenu(HINSTANCE hInst, HWND hWndNpp, HWND hWndParent
 	::DestroyMenu(hMainMenu);
 	::DestroyMenu(hMenuNppExec);
 
-	if ((_pidlArray != NULL) && (g_OldWndProc != NULL)) // unsubclass
+	if (g_subclassApplied) // unsubclass
 	{
-		::SetWindowLongPtr(hWndParent, GWLP_WNDPROC, (LONG_PTR) g_OldWndProc);
+		RemoveWindowSubclass(hWndParent, HookWndProc, _idSubclassContextMenuProc);
 	}
 
 	// see if returned idCommand belongs to shell menu entries but not for renaming (19)

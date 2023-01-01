@@ -19,10 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 #include "SysMsg.h"
-#include "ExplorerResource.h"
 #include "ComboOrgi.h"
-
-
 
 ComboOrgi::ComboOrgi()
 {
@@ -43,10 +40,17 @@ void ComboOrgi::init(HWND hCombo)
 	comboBoxInfo.cbSize = sizeof(COMBOBOXINFO);
 
 	::SendMessage(_hCombo, CB_GETCOMBOBOXINFO, 0, (LPARAM)&comboBoxInfo);
-	::SetWindowLongPtr(comboBoxInfo.hwndItem, GWLP_USERDATA, (LONG_PTR)this);
-	_hDefaultComboProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(comboBoxInfo.hwndItem, GWLP_WNDPROC, (LONG_PTR)wndDefaultProc));
+	SetWindowSubclass(comboBoxInfo.hwndItem, wndDefaultProc, _idSubclassComboId, (DWORD_PTR)this);
 }
 
+void ComboOrgi::destroy()
+{
+	COMBOBOXINFO	comboBoxInfo;
+	comboBoxInfo.cbSize = sizeof(COMBOBOXINFO);
+
+	::SendMessage(_hCombo, CB_GETCOMBOBOXINFO, 0, (LPARAM)&comboBoxInfo);
+	RemoveWindowSubclass(comboBoxInfo.hwndItem, wndDefaultProc, _idSubclassComboId);
+}
 
 LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -60,6 +64,10 @@ LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 
 				getText(pszText);
 				addText(pszText);
+
+				HWND hwParent = GetParent(_hCombo);
+				SendMessage(hwParent, WM_COMMAND, MAKEWPARAM(0, CBN_SELCHANGE), (LPARAM)_hCombo);
+
 				return TRUE;
 			}
 			break;
@@ -67,7 +75,7 @@ LRESULT ComboOrgi::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 		default :
 			break;
 	}
-	return ::CallWindowProc(_hDefaultComboProc, hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hwnd, Message, wParam, lParam);
 }
 
 

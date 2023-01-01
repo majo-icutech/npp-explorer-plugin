@@ -112,7 +112,7 @@ static TCHAR CONFIG_PATH[]		= _T("\\plugins\\Config");
 /********************************************************/
 
 /* see in notepad sources */
-static LPTSTR cVarExNppExec[] = {
+static LPCTSTR cVarExNppExec[] = {
 	_T("EXP_FULL_PATH"),
 	_T("EXP_ROOT_PATH"),
 	_T("EXP_PARENT_FULL_DIR"),
@@ -155,8 +155,8 @@ typedef enum {
 const LPTSTR pszSizeFmt[] = {
 	_T("Bytes"),
 	_T("kBytes"),
-	_T("Dynamic x b/k/M"),
-	_T("Dynamic x,x b/k/M")
+	_T("Dynamic x b/k/M/G"),
+	_T("Dynamic x,x b/k/M/G")
 };
 
 typedef enum {
@@ -239,7 +239,7 @@ typedef struct {
 
 
 #define MAX_NPP_EXAMPLE_LINE	22
-static LPTSTR szExampleScript[MAX_NPP_EXAMPLE_LINE] = {
+static LPCTSTR szExampleScript[MAX_NPP_EXAMPLE_LINE] = {
 	_T("//Explorer: NppExec.dll EXP_FULL_PATH[0]\r\n"),
 	_T("// ------------------------------------------------------------------\r\n"),
 	_T("// NOTE: The first line is in every script necessary\r\n"),
@@ -278,7 +278,7 @@ void clearFilter(void);
 void openOptionDlg(void);
 void openHelpDlg(void);
 
-LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
 BOOL VolumeNameExists(LPTSTR rootDrive, LPTSTR volumeName);
 bool IsValidFileName(LPTSTR pszFileName);

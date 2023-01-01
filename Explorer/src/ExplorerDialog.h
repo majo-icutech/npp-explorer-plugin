@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "FileList.h"
 #include "ComboOrgi.h"
 #include "Toolbar.h"
+#include "NppDarkMode.h"
 
 #include "Explorer.h"
 #include "ExplorerResource.h"
@@ -58,7 +59,6 @@ class ExplorerDialog : public DockingDlgInterface, public TreeHelper, public CID
 {
 public:
 	ExplorerDialog(void);
-	~ExplorerDialog(void);
 
     void init(HINSTANCE hInst, NppData nppData, tExProp *prop);
 
@@ -87,7 +87,7 @@ public:
 		_bStartupFinish = TRUE;
 		::SendMessage(_hSelf, WM_SIZE, 0, 0);
 		UpdateColors();
-	};
+	}
 
 	void NotifyEvent(DWORD event);
 
@@ -99,18 +99,22 @@ public:
 protected:
 
 	/* Subclassing tree */
+	static const int _idSubclassTreeProc = 43;
 	LRESULT runTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK wndDefaultTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-		return (((ExplorerDialog *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA)))->runTreeProc(hwnd, Message, wParam, lParam));
-	};
+	static LRESULT CALLBACK wndDefaultTreeProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+		auto pThis = (ExplorerDialog*)dwRefData;
+		return pThis->runTreeProc(hwnd, Message, wParam, lParam);
+	}
 
 	/* Subclassing splitter */
+	static const int _idSubclassSplitterProc = 43;
 	LRESULT runSplitterProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK wndDefaultSplitterProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-		return (((ExplorerDialog *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA)))->runSplitterProc(hwnd, Message, wParam, lParam));
-	};
+	static LRESULT CALLBACK wndDefaultSplitterProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+		auto pThis = (ExplorerDialog*)dwRefData;
+		return pThis->runSplitterProc(hwnd, Message, wParam, lParam);
+	}
 
-	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
+	INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
 
 	void InitialDialog(void);
 	void InitialFont(void);
@@ -142,10 +146,6 @@ private:
 	HANDLE					_hExploreVolumeThread;
 	HTREEITEM				_hItemExpand;
 	HFONT					_hFont;
-
-	/* control process */
-	WNDPROC					_hDefaultTreeProc;
-	WNDPROC					_hDefaultSplitterProc;
 	
 	/* some status values */
 	BOOL					_bOldRectInitilized;
@@ -178,9 +178,10 @@ private:
 	/* drag and drop values */
 	BOOL					_isScrolling;
 	BOOL					_isDnDStarted;
+
+	/* colors */
+	NppDarkMode::Colors		_cDarkModeColors;
+	bool					_bDarkModeEnabled;
 };
-
-
-
 
 #endif // EXPLORERDLG_DEFINE_H
