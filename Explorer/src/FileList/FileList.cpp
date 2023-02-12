@@ -668,6 +668,9 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 					}
 					case CDDS_ITEMPREPAINT:
 					{
+						/* set correct bk color*/
+						lpCD->clrTextBk = ListView_GetBkColor(_hSelf);
+
 						/* get correct font */
 						UINT	iItem = (UINT)lpCD->nmcd.dwItemSpec;
 						if (iItem >= _uMaxFolders) {
@@ -680,9 +683,13 @@ BOOL FileList::notify(WPARAM wParam, LPARAM lParam)
 						
 						if (_vFileList[iItem].bParent)
 						{
-							SetWindowLongPtr(_hParent, DWLP_MSGRESULT, CDRF_NOTIFYPOSTPAINT);
+							SetWindowLongPtr(_hParent, DWLP_MSGRESULT, CDRF_NEWFONT | CDRF_NOTIFYPOSTPAINT);
 						}
-						
+						else
+						{
+							SetWindowLongPtr(_hParent, DWLP_MSGRESULT, CDRF_NEWFONT);
+						}
+
 						return TRUE;
 					}					
 					case CDDS_ITEMPOSTPAINT:

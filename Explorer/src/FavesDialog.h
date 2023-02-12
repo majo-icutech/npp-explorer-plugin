@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "PropDlg.h"
 
 #include "Explorer.h"
-#include "NppDarkMode.h"
 
 typedef enum eMenuID {
 	FM_NEWLINK = 1,
@@ -161,8 +160,6 @@ private:
 	BOOL					_addToSession;
 	PELEM					_peOpenLink;
 	tExProp*				_pExProp;
-	NppDarkMode::Colors		_cDarkModeColors;
-	bool					_bDarkModeEnabled;
 
 	/* database */
 	vector<tItemElement>	_vDB;

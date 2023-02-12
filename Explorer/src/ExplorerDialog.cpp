@@ -179,7 +179,7 @@ void ExplorerDialog::doDialog(bool willBeShown)
 		create(&_data);
 
 		// define the default docking behaviour
-		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ADDINFO | DWS_ICONTAB | DWS_USEOWNDARKMODE;
+		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ADDINFO | DWS_ICONTAB;
 		_data.pszName		= _T("Explorer");
 		_data.pszAddInfo	= _pExProp->szCurrentPath;
 		_data.hIconTab		= (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_EXPLORE), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
@@ -323,31 +323,6 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 				{
 					tb_not((LPNMTOOLBAR)lParam);
 					return TBDDRET_NODEFAULT;
-				}
-				else if (nmhdr->code == NM_CUSTOMDRAW)
-				{
-					LPNMTBCUSTOMDRAW lpCD = (LPNMTBCUSTOMDRAW)lParam;
-
-					switch (lpCD->nmcd.dwDrawStage)
-					{
-					case CDDS_PREPAINT:
-						if (_bDarkModeEnabled)
-						{
-							HBRUSH hBrush = ::CreateSolidBrush(_cDarkModeColors.background);
-							FillRect(lpCD->nmcd.hdc, &lpCD->nmcd.rc, hBrush);
-							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_NEWFONT);
-							DeleteObject(hBrush);
-						}
-						else
-						{
-							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_DODEFAULT);
-						}
-						return TRUE;
-					default:
-						break;
-					}
-
-					return FALSE;
 				}
 				break;
 			}
@@ -511,40 +486,12 @@ INT_PTR CALLBACK ExplorerDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM
 			{
 				RECT		rc		= pDrawItemStruct->rcItem;
 				HDC			hDc		= pDrawItemStruct->hDC;
-				HBRUSH		bgbrush	= ::CreateSolidBrush(_bDarkModeEnabled ? _cDarkModeColors.background : GetSysColor(COLOR_3DFACE));
+				HBRUSH		bgbrush	= ::CreateSolidBrush(_bDarkModeEnabled ? _cDarkModeColors.pureBackground : GetSysColor(COLOR_3DFACE));
 
 				/* fill background */
 				::FillRect(hDc, &rc, bgbrush);
 
 				::DeleteObject(bgbrush);
-				return TRUE;
-			}
-			break;
-		}
-		case WM_CTLCOLORSTATIC:
-		{
-			if (_bDarkModeEnabled)
-			{
-				HDC hdcStatic = (HDC)wParam;
-
-				SetTextColor(hdcStatic, _cDarkModeColors.text);
-				SetBkColor(hdcStatic, _cDarkModeColors.background);
-
-				return TRUE;
-			}
-			break;
-		}
-		case WM_ERASEBKGND:
-		{
-			if (_bDarkModeEnabled)
-			{
-				HBRUSH bgbrush = CreateSolidBrush(_cDarkModeColors.background);
-				RECT clientRect = { 0 };
-				GetClientRect(_hSelf, &clientRect);
-				FillRect((HDC)wParam, &clientRect, bgbrush);
-
-				DeleteObject(bgbrush);
-
 				return TRUE;
 			}
 			break;
@@ -1365,6 +1312,7 @@ void ExplorerDialog::InitialDialog(void)
 	_hFilterStatic	= ::GetDlgItem(_hSelf, IDC_STATIC_FILTER);
 
 	InitialFont();
+	UpdateColors();
 
 	/* subclass tree */
 	SetWindowSubclass(_hTreeCtrl, wndDefaultTreeProc, _idSubclassTreeProc, (DWORD_PTR)this);
@@ -1975,29 +1923,19 @@ bool ExplorerDialog::doPaste(LPCTSTR pszTo, LPDROPFILES hData, const DWORD & dwE
 
 void ExplorerDialog::UpdateColors()
 {
+	COLORREF crBgColor = (COLORREF)SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR, NULL, NULL);
+	COLORREF crFgColor = (COLORREF)SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR, NULL, NULL);
+
+	TreeView_SetBkColor(_hTreeCtrl, crBgColor);
+	TreeView_SetTextColor(_hTreeCtrl, crFgColor);
+
+	ListView_SetBkColor(_hListCtrl, crBgColor);
+	ListView_SetTextColor(_hListCtrl, crFgColor);
+
 	auto isDarkModeEnabled = (bool)SendMessage(_nppData._nppHandle, NPPM_ISDARKMODEENABLED, NULL, NULL);
 	auto result = (bool)SendMessage(_nppData._nppHandle, NPPM_GETDARKMODECOLORS, sizeof(_cDarkModeColors), (LPARAM)(&_cDarkModeColors));
 
 	_bDarkModeEnabled = isDarkModeEnabled && result;
-
-	if (_bDarkModeEnabled)
-	{
-		TreeView_SetBkColor(_hTreeCtrl, _cDarkModeColors.background);
-		TreeView_SetTextColor(_hTreeCtrl, _cDarkModeColors.text);
-
-		ListView_SetBkColor(_hListCtrl, _cDarkModeColors.background);
-		ListView_SetTextColor(_hListCtrl, _cDarkModeColors.text);
-		ListView_SetTextBkColor(_hListCtrl, CLR_NONE);
-	}
-	else
-	{
-		TreeView_SetBkColor(_hTreeCtrl, RGB(0xFF, 0xFF, 0xFF));
-		TreeView_SetTextColor(_hTreeCtrl, RGB(0x00, 0x00, 0x00));
-
-		ListView_SetBkColor(_hListCtrl, RGB(0xFF, 0xFF, 0xFF));
-		ListView_SetTextColor(_hListCtrl, RGB(0x00, 0x00, 0x00));
-		ListView_SetTextBkColor(_hListCtrl, CLR_NONE);
-	}
 
 	// also look at listview's custom draw code (NM_CUSTOMDRAW) in FileList.cpp
 	// the code there was modified to use ListView_GetBkColor and ListView_GetTextColor

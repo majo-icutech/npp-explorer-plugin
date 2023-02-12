@@ -102,7 +102,7 @@ void FavesDialog::doDialog(bool willBeShown)
 		create(&_data);
 
 		// define the default docking behaviour
-		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ICONTAB | DWS_USEOWNDARKMODE;
+		_data.uMask			= DWS_DF_CONT_LEFT | DWS_ICONTAB;
 		_data.pszName		= _T("Favorites");
 		_data.hIconTab		= (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_HEART), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
 		_data.pszModuleName	= getPluginFileName();
@@ -253,15 +253,6 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 								HTREEITEM	hItem		= (HTREEITEM)lpCD->nmcd.dwItemSpec;
 								PELEM		pElem		= (PELEM)GetParam(hItem);
 
-								if (_bDarkModeEnabled)
-								{
-									if ((lpCD->nmcd.uItemState & CDIS_SELECTED) == CDIS_SELECTED)
-									{
-										lpCD->clrTextBk = _cDarkModeColors.hotBackground;
-										lpCD->clrText = _cDarkModeColors.text;
-									}
-								}
-
 								if (pElem) {
 									if ((pElem->uParam & FAVES_FILES) && (pElem->uParam & FAVES_PARAM_LINK)) {
 										if (IsFileOpen(pElem->pszLink) == TRUE) {
@@ -354,35 +345,6 @@ INT_PTR CALLBACK FavesDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lP
 						tb_cmd(_ToolBar.doPopop(pt));
 						return TRUE;
 					}
-				}
-				break;
-			}
-			else if (nmhdr->hwndFrom == _ToolBar.getHSelf())
-			{
-				if (nmhdr->code == NM_CUSTOMDRAW)
-				{
-					LPNMTBCUSTOMDRAW lpCD = (LPNMTBCUSTOMDRAW)lParam;
-
-					switch (lpCD->nmcd.dwDrawStage)
-					{
-					case CDDS_PREPAINT:
-						if (_bDarkModeEnabled)
-						{
-							HBRUSH hBrush = ::CreateSolidBrush(_cDarkModeColors.background);							
-							FillRect(lpCD->nmcd.hdc, &lpCD->nmcd.rc, hBrush);
-							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_NEWFONT);
-							DeleteObject(hBrush);
-						}
-						else
-						{
-							SetWindowLongPtr(_hSelf, DWLP_MSGRESULT, CDRF_DODEFAULT);
-						}
-						return TRUE;
-					default:
-						break;
-					}
-
-					return FALSE;
 				}
 				break;
 			}
@@ -2170,21 +2132,11 @@ void FavesDialog::SaveElementTreeRecursive(PELEM pElem, HANDLE hFile)
 
 void FavesDialog::UpdateColors()
 {
-	auto isDarkModeEnabled  = (bool)SendMessage(_nppData._nppHandle, NPPM_ISDARKMODEENABLED, NULL, NULL);
-	auto result = (bool)SendMessage(_nppData._nppHandle, NPPM_GETDARKMODECOLORS, sizeof(_cDarkModeColors), (LPARAM)(&_cDarkModeColors));
+	COLORREF crBgColor = (COLORREF)SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR, NULL, NULL);
+	COLORREF crFgColor = (COLORREF)SendMessage(_nppData._nppHandle, NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR, NULL, NULL);
 
-	_bDarkModeEnabled = isDarkModeEnabled && result;
-
-	if (_bDarkModeEnabled)
-	{
-		TreeView_SetBkColor(_hTreeCtrl, _cDarkModeColors.background);
-		TreeView_SetTextColor(_hTreeCtrl, _cDarkModeColors.text);
-	}
-	else
-	{
-		TreeView_SetBkColor(_hTreeCtrl, RGB(255, 255, 255));
-		TreeView_SetTextColor(_hTreeCtrl, RGB(0, 0, 0));
-	}
+	TreeView_SetBkColor(_hTreeCtrl, crBgColor);
+	TreeView_SetTextColor(_hTreeCtrl, crFgColor);
 
 	::InvalidateRect(_hTreeCtrl, NULL, TRUE);
 }
