@@ -737,14 +737,6 @@ void ExtractIcons(LPCTSTR currentPath, LPCTSTR volumeName, eDevType type,
 		{
 			::ZeroMemory(&sfi, sizeof(SHFILEINFO));
 			SHGetFileInfo(TEMP, 
-				-1,
-				&sfi, 
-				sizeof(SHFILEINFO), 
-				SHGFI_ICON | SHGFI_SMALLICON | stOverlay);
-			::DestroyIcon(sfi.hIcon);
-
-			::ZeroMemory(&sfi, sizeof(SHFILEINFO));
-			SHGetFileInfo(TEMP, 
 				FILE_ATTRIBUTE_NORMAL, 
 				&sfi, 
 				sizeof(SHFILEINFO), 
@@ -781,43 +773,19 @@ void ExtractIcons(LPCTSTR currentPath, LPCTSTR volumeName, eDevType type,
 			*piIconNormal	= ICON_FILE;
 			*piIconSelected	= ICON_FILE;
 		}
+
 		if (piIconOverlayed != NULL)
 			*piIconOverlayed = 0;
 	}
 	else
 	{
 		/* get normal and overlayed icon */
-		if ((type == DEVT_DIRECTORY) || (type == DEVT_DRIVE))
-		{
-			::ZeroMemory(&sfi, sizeof(SHFILEINFO));
-			SHGetFileInfo(TEMP, 
-				-1,
-				&sfi, 
-				sizeof(SHFILEINFO), 
-				SHGFI_ICON | SHGFI_SMALLICON | stOverlay);
-			::DestroyIcon(sfi.hIcon);
-
-			if (type == DEVT_DRIVE)
-			{	
-				::ZeroMemory(&sfi, sizeof(SHFILEINFO));
-				SHGetFileInfo(TEMP, 
-					FILE_ATTRIBUTE_NORMAL, 
-					&sfi, 
-					sizeof(SHFILEINFO), 
-					SHGFI_ICON | SHGFI_SMALLICON | stOverlay | SHGFI_USEFILEATTRIBUTES);
-				::DestroyIcon(sfi.hIcon);
-			}
-		}
-		else
-		{
-			::ZeroMemory(&sfi, sizeof(SHFILEINFO));
-			SHGetFileInfo(TEMP, 
-				FILE_ATTRIBUTE_NORMAL, 
-				&sfi, 
-				sizeof(SHFILEINFO), 
-				SHGFI_ICON | SHGFI_SMALLICON | stOverlay | SHGFI_USEFILEATTRIBUTES);
-			::DestroyIcon(sfi.hIcon);
-		}
+		::ZeroMemory(&sfi, sizeof(SHFILEINFO));
+		SHGetFileInfo(TEMP,
+			FILE_ATTRIBUTE_NORMAL,
+			&sfi,
+			sizeof(SHFILEINFO),
+			SHGFI_SYSICONINDEX | SHGFI_SMALLICON | stOverlay | (type == DEVT_DIRECTORY ? 0 : SHGFI_USEFILEATTRIBUTES));
 
 		*piIconNormal	= sfi.iIcon & 0x00ffffff;
 		if (piIconOverlayed != NULL)
@@ -832,7 +800,6 @@ void ExtractIcons(LPCTSTR currentPath, LPCTSTR volumeName, eDevType type,
 				&sfi, 
 				sizeof(SHFILEINFO), 
 				SHGFI_SYSICONINDEX | SHGFI_SMALLICON | SHGFI_OPENICON);
-			::DestroyIcon(sfi.hIcon);
 
 			*piIconSelected = sfi.iIcon;
 		}
