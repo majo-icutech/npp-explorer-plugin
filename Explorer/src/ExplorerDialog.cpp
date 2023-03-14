@@ -1938,9 +1938,7 @@ void ExplorerDialog::UpdateColors()
 	_bDarkModeEnabled = isDarkModeEnabled && result;
 
 	// also look at listview's custom draw code (NM_CUSTOMDRAW) in FileList.cpp
-	// the code there was modified to use ListView_GetBkColor and ListView_GetTextColor
-	// so that we get a consistent look.
-
-	::InvalidateRect(_hTreeCtrl, NULL, TRUE);
+	// the code there was modified to use ListView_GetBkColor so that we get a consistent look.
+	
 	::InvalidateRect(_hListCtrl, NULL, TRUE);
 }

@@ -2137,6 +2137,4 @@ void FavesDialog::UpdateColors()
 
 	TreeView_SetBkColor(_hTreeCtrl, crBgColor);
 	TreeView_SetTextColor(_hTreeCtrl, crFgColor);
-
-	::InvalidateRect(_hTreeCtrl, NULL, TRUE);
 }
