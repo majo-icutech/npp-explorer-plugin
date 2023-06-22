@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "stdafx.h"
 #include "TreeHelperClass.h"
 #include "Explorer.h"
+#include "FileList.h"
 #include <algorithm>
 
 
@@ -40,7 +41,7 @@ void debug_print(char const* format, ...)
 #endif
 }
 
-void TreeHelper::DrawChildren(HTREEITEM parentItem)
+void TreeHelper::DrawChildren(HTREEITEM parentItem, bool bUseFullTree)
 {
 	TCHAR				parentFolderPathName[MAX_PATH];
 	size_t				iCnt			= 0;
@@ -48,6 +49,7 @@ void TreeHelper::DrawChildren(HTREEITEM parentItem)
 	HANDLE				hFind			= NULL;
 	tItemList			listElement;
 	vector<tItemList>	vFolderList;
+	vector<tItemList>	vFileList;
 
 	GetFolderPathName(parentItem, parentFolderPathName);
 
@@ -73,23 +75,30 @@ void TreeHelper::DrawChildren(HTREEITEM parentItem)
 				listElement.strName	= Find.cFileName;
 				vFolderList.push_back(listElement);
 			}
+			else if(bUseFullTree && IsValid(Find) == TRUE)
+			{
+				listElement.strName = Find.cFileName;
+				vFileList.push_back(listElement);
+			}
 		} while (FindNextFile(hFind, &Find));
 
 		::FindClose(hFind);
 
 		/* sort data */
 		std::sort(vFolderList.begin(), vFolderList.end());
-	 
+		std::sort(vFileList.begin(), vFileList.end());
+		vFolderList.insert(vFolderList.end(), vFileList.begin(), vFileList.end());
+	
 		for (iCnt = 0; iCnt < vFolderList.size(); iCnt++)
 		{
-			if (InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), parentItem) == NULL)
+			if (InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), parentItem, TVI_LAST, TRUE, bUseFullTree) == NULL)
 				break;
 		}
 		debug_print("DrawChildren() ends:\n");
 	}
 }
 
-void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOOL doRecursive)
+void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOOL doRecursive, BOOL bUseFullTree)
 {
 	size_t				iCnt			= 0;
 	WIN32_FIND_DATA		Find			= {0};
@@ -97,6 +106,7 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 	TVITEM				item			= {0};
 	
 	vector<tItemList>	vFolderList;
+	vector<tItemList>	vFileList;
 	tItemList			listElement;
 	TCHAR				pszItem[MAX_PATH];
 	TCHAR				pszPath[MAX_PATH];
@@ -122,9 +132,15 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 		{
 			if (IsValidFolder(Find) == TRUE)
 			{
-				listElement.strName			= Find.cFileName;
-				listElement.dwAttributes	= Find.dwFileAttributes;
+				listElement.strName = Find.cFileName;
+				listElement.dwAttributes = Find.dwFileAttributes;
 				vFolderList.push_back(listElement);
+			}
+			else if (bUseFullTree && IsValid(Find))
+			{
+				listElement.strName = Find.cFileName;
+				listElement.dwAttributes = Find.dwFileAttributes;
+				vFileList.push_back(listElement);
 			}
 		} while (FindNextFile(hFind, &Find));
 
@@ -132,6 +148,8 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 
 		/* sort data */
 		std::sort(vFolderList.begin(), vFolderList.end());
+		std::sort(vFileList.begin(), vFileList.end());
+		vFolderList.insert(vFolderList.end(), vFileList.begin(), vFileList.end());
 
 		/* update tree */
 		for (iCnt = 0; iCnt < vFolderList.size(); iCnt++)
@@ -156,9 +174,9 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 
 						/* Note: If hCurrentItem is the first item in the list pPrevItem is NULL */
 						if (pPrevItem == NULL)
-							hCurrentItem = InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), hParentItem, TVI_FIRST);
+							hCurrentItem = InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), hParentItem, TVI_FIRST, bUseFullTree);
 						else
-							hCurrentItem = InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), hParentItem, pPrevItem);
+							hCurrentItem = InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), hParentItem, pPrevItem, bUseFullTree);
 					}
 
 					if (hCurrentItem != NULL)
@@ -172,7 +190,7 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 				INT		iIconNormal		= 0;
 				INT		iIconSelected	= 0;
 				INT		iIconOverlayed	= 0;
-				BOOL	haveChildren	= HaveChildren(pszPath);
+				BOOL	haveChildren	= HaveChildren(pszPath, bUseFullTree);
 				BOOL	bHidden			= FALSE;
 
 				/* correct by HaveChildren() modified pszPath */
@@ -188,7 +206,7 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 				if ((doRecursive) && IsItemExpanded(hCurrentItem))
 				{
 					debug_print("Go into: %S\n", pszPath);
-					UpdateChildren(pszPath, hCurrentItem);
+					UpdateChildren(pszPath, hCurrentItem, doRecursive, bUseFullTree);
 					debug_print("%S\n", pszPath);
 				}
 
@@ -197,7 +215,7 @@ void TreeHelper::UpdateChildren(LPTSTR pszParentPath, HTREEITEM hParentItem, BOO
 			}
 			else
 			{
-				hCurrentItem = InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), hParentItem);
+				hCurrentItem = InsertChildFolder((LPTSTR)vFolderList[iCnt].strName.c_str(), hParentItem, TVI_LAST, TRUE, bUseFullTree);
 				hCurrentItem = TreeView_GetNextItem(_hTreeCtrl, hCurrentItem, TVGN_NEXT);
 			}
 		}
@@ -237,7 +255,7 @@ BOOL TreeHelper::FindFolderAfter(LPTSTR itemName, HTREEITEM pAfterItem)
 	return isFound;
 }
 
-HTREEITEM TreeHelper::InsertChildFolder(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter, BOOL bChildrenTest)
+HTREEITEM TreeHelper::InsertChildFolder(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter, BOOL bChildrenTest, BOOL bUseFullTree)
 {
 	/* We search if it already exists */
 	HTREEITEM			pCurrentItem	= TreeView_GetNextItem(_hTreeCtrl, parentItem, TVGN_CHILD);
@@ -269,7 +287,7 @@ HTREEITEM TreeHelper::InsertChildFolder(LPTSTR childFolderName, HTREEITEM parent
 	BOOL	haveChildren = FALSE;
 	if (bChildrenTest == TRUE)
 	{
-		haveChildren = HaveChildren(parentFolderPathName);
+		haveChildren = HaveChildren(parentFolderPathName, bUseFullTree);
 	}
 
 	/* insert item */
@@ -461,7 +479,7 @@ std::vector<std::wstring> TreeHelper::GetItemPathFromRoot(HTREEITEM currentItem)
 	return result;
 }
 
-void TreeHelper::GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName)
+void TreeHelper::GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName, bool appendBackslash)
 {
 	vector<wstring> path = GetItemPathFromRoot(currentItem);
 
@@ -478,7 +496,7 @@ void TreeHelper::GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName)
 			_stprintf(folderPathName, _T("%s\\%s"), folderPathName, path[i].c_str());
 		}
 	}
-	if (folderPathName[0] != '\0')
+	if (folderPathName[0] != '\0' && appendBackslash)
 	{
 		PathRemoveBackslash(folderPathName);
 		_stprintf(folderPathName, _T("%s\\"), folderPathName);

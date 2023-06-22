@@ -36,10 +36,10 @@ public:
 protected:
 
 	std::vector<std::wstring> GetItemPathFromRoot(HTREEITEM currentItem);
-	void GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName);
-	void DrawChildren(HTREEITEM parentItem);
-	void UpdateChildren(LPTSTR pszParentPath, HTREEITEM pCurrentItem, BOOL doRecursive = TRUE );
-	HTREEITEM InsertChildFolder(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter = TVI_LAST, BOOL bChildrenTest = TRUE);
+	void GetFolderPathName(HTREEITEM currentItem, LPTSTR folderPathName, bool appendBackslash = true);
+	void DrawChildren(HTREEITEM parentItem, bool bUseFullTree);
+	void UpdateChildren(LPTSTR pszParentPath, HTREEITEM pCurrentItem, BOOL doRecursive = TRUE, BOOL bUseFullTree = FALSE);
+	HTREEITEM InsertChildFolder(LPTSTR childFolderName, HTREEITEM parentItem, HTREEITEM insertAfter = TVI_LAST, BOOL bChildrenTest = TRUE, BOOL bUseFullTree = FALSE);
 	HTREEITEM InsertItem(LPTSTR lpszItem, INT nImage, INT nSelectedIamage, INT nOverlayedImage, BOOL bHidden, HTREEITEM hParent, HTREEITEM hInsertAfter = TVI_LAST, BOOL haveChildren = FALSE, LPARAM lParam = NULL);
 	BOOL UpdateItem(HTREEITEM hItem, LPTSTR lpszItem, INT nImage, INT nSelectedIamage, INT nOverlayedImage, BOOL bHidden, BOOL haveChildren = FALSE, LPARAM lParam = NULL, BOOL delChildren = TRUE);
 	void DeleteChildren(HTREEITEM parentItem);

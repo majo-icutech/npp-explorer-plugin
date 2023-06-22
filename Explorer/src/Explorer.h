@@ -235,6 +235,7 @@ typedef struct {
 	UINT			uTimeout;
 	BOOL			bUseSystemIcons;
 	tNppExecProp	nppExecProp;
+	BOOL			bUseFullTree;
 } tExProp;
 
 
@@ -282,10 +283,11 @@ LRESULT CALLBACK SubWndProcNotepad(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
 BOOL VolumeNameExists(LPTSTR rootDrive, LPTSTR volumeName);
 bool IsValidFileName(LPTSTR pszFileName);
+bool IsValid(const WIN32_FIND_DATA & Find);
 bool IsValidFolder(const WIN32_FIND_DATA & Find);
 bool IsValidParentFolder(const WIN32_FIND_DATA & Find);
 bool IsValidFile(const WIN32_FIND_DATA & Find);
-BOOL HaveChildren(LPTSTR parentFolderPathName);
+BOOL HaveChildren(LPTSTR parentFolderPathName, bool useFullTree);
 BOOL ConvertNetPathName(LPCTSTR pPathName, LPTSTR pRemotePath, UINT length);
 
 /* Get Image Lists */
